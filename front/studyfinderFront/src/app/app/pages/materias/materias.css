@@ -1,0 +1,126 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+header h1 {
+  color: var(--primary);
+  font-size: 38px;
+}
+
+header p {
+  color: #666;
+}
+
+button {
+  background: var(--secondary);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 26px;
+  cursor: pointer;
+  transition: .3s;
+}
+
+button:hover {
+  transform: translateY(-2px);
+}
+
+.back {
+  display: block;
+  background: none;
+  color: var(--primary);
+  padding: 0;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.back:hover {
+  transform: none;
+  text-decoration: underline;
+}
+
+.materias-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+}
+
+.materia-card {
+  background: var(--card);
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, .08);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.materia-card h3 {
+  color: var(--primary);
+  font-size: 20px;
+}
+
+.materia-card p {
+  color: #666;
+}
+
+.materia-card button {
+  align-self: flex-start;
+}
+
+.documentos-list {
+  background: var(--card);
+  border-radius: 20px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, .08);
+  overflow: hidden;
+}
+
+.documento-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 30px;
+  border-bottom: 1px solid #eee;
+  transition: .2s;
+}
+
+.documento-row:last-child {
+  border-bottom: none;
+}
+
+.documento-row:hover {
+  background: #fafafa;
+}
+
+.doc-icon {
+  font-size: 28px;
+}
+
+.doc-info {
+  flex: 1;
+}
+
+.doc-info h4 {
+  color: var(--primary);
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.doc-info p {
+  color: #888;
+  font-size: 14px;
+}

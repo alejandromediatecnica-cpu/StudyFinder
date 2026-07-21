@@ -1,73 +1,12 @@
 :host {
-  --primary: #152C5B;
-  --secondary: #15B9EA;
-  --background: #EBEBEB;
-  --card: #FFFFFF;
-
   display: block;
   width: 100%;
-  min-height: 100vh;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-}
-
-.dashboard {
-  display: grid;
-  grid-template-columns: 260px 1fr;
-  min-height: 100vh;
-  background: var(--background);
-}
-
-/* SIDEBAR */
-.sidebar {
-  background: var(--primary);
-  color: white;
-  padding: 35px;
-}
-
-.logo {
-  margin-bottom: 50px;
-}
-
-.logo h2 {
-  font-size: 30px;
-}
-
-.logo span {
-  color: #d9d9d9;
-}
-
-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-nav a {
-  padding: 14px;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: .25s;
-  text-decoration: none;
-  color: white;
-}
-
-nav a:hover {
-  background: var(--secondary);
-}
-
-.active {
-  background: var(--secondary);
-}
-
-/* MAIN */
-.content {
-  padding: 40px;
 }
 
 header {
@@ -100,7 +39,6 @@ button:hover {
   transform: translateY(-2px);
 }
 
-/* CARDS */
 .cards {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -125,7 +63,6 @@ button:hover {
   font-weight: bold;
 }
 
-/* PANELS */
 .bottom {
   margin-top: 35px;
   display: grid;

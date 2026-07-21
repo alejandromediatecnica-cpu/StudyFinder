@@ -1,1 +1,41 @@
-<p>materias works!</p>
+@if (materiaSeleccionada(); as materia) {
+  <header>
+    <div>
+      <button class="back" (click)="volver()">← Volver</button>
+      <h1>{{ materia.nombre }}</h1>
+      <p>{{ materia.documentos.length }} documentos</p>
+    </div>
+    <button>+ Subir documento</button>
+  </header>
+
+  <section class="documentos-list">
+    @for (doc of materia.documentos; track doc.id) {
+      <div class="documento-row">
+        <span class="doc-icon">{{ iconoPorTipo(doc.tipo) }}</span>
+        <div class="doc-info">
+          <h4>{{ doc.nombre }}</h4>
+          <p>{{ doc.fecha }} • {{ doc.tamano }}</p>
+        </div>
+        <button class="doc-action">Abrir</button>
+      </div>
+    }
+  </section>
+} @else {
+  <header>
+    <div>
+      <h1>Mis materias</h1>
+      <p>Organiza tus documentos por materia.</p>
+    </div>
+    <button>+ Nueva materia</button>
+  </header>
+
+  <section class="materias-grid">
+    @for (materia of materias(); track materia.id) {
+      <div class="materia-card">
+        <h3>{{ materia.nombre }}</h3>
+        <p>{{ materia.documentos.length }} documentos</p>
+        <button (click)="seleccionarMateria(materia)">Ver documentos</button>
+      </div>
+    }
+  </section>
+}

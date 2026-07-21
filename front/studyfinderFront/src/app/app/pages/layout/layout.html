@@ -1,0 +1,26 @@
+<div class="dashboard">
+
+    <aside class="sidebar">
+
+        <div class="logo">
+            <h2>StudyFinder</h2>
+            <span>Smart Learning</span>
+        </div>
+
+        <nav>
+            <a routerLink="/main" routerLinkActive="active">🏠 Inicio</a>
+            <a routerLink="/materias" routerLinkActive="active">📚 Mis materias</a>
+            <a routerLink="/calendario" routerLinkActive="active">📅 Calendario</a>
+            <a routerLink="/tareas" routerLinkActive="active">📝 Tareas</a>
+            <a routerLink="/ia" routerLinkActive="active">🤖 IA</a>
+            <a routerLink="/estadisticas" routerLinkActive="active">📊 Estadísticas</a>
+            <a routerLink="/configuracion" routerLinkActive="active">⚙ Configuración</a>
+        </nav>
+
+    </aside>
+
+    <section class="content">
+        <router-outlet></router-outlet>
+    </section>
+
+</div>
