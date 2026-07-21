@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { LayoutComponent } from './app/pages/layout/layout';
 import { MainComponent } from './app/pages/main/main';
 import { MateriasComponent } from './app/pages/materias/materias';
 import { CalendarioComponent } from './app/pages/calendario/calendario';
@@ -10,39 +11,17 @@ import { ConfiguracionComponent } from './app/pages/configuracion/configuracion'
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'main',
-    pathMatch: 'full'
+    component: LayoutComponent,
+    children: [
+      { path: '', redirectTo: 'main', pathMatch: 'full' },
+      { path: 'main', component: MainComponent },
+      { path: 'materias', component: MateriasComponent },
+      { path: 'calendario', component: CalendarioComponent },
+      { path: 'tareas', component: TareasComponent },
+      { path: 'ia', component: IaComponent },
+      { path: 'estadisticas', component: EstadisticasComponent },
+      { path: 'configuracion', component: ConfiguracionComponent },
+    ]
   },
-  {
-    path: 'main',
-    component: MainComponent
-  },
-  {
-    path: 'materias',
-    component: MateriasComponent
-  },
-  {
-    path: 'calendario',
-    component: CalendarioComponent
-  },
-  {
-    path: 'tareas',
-    component: TareasComponent
-  },
-  {
-    path: 'ia',
-    component: IaComponent
-  },
-  {
-    path: 'estadisticas',
-    component: EstadisticasComponent
-  },
-  {
-    path: 'configuracion',
-    component: ConfiguracionComponent
-  },
-  {
-    path: '**',
-    redirectTo: 'main'
-  }
+  { path: '**', redirectTo: 'main' }
 ];
