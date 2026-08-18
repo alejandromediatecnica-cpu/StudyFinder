@@ -1,1 +1,37 @@
-<p>calendario works!</p>
+<div class="calendar-page">
+  <header class="calendar-header">
+    <div class="header-left"><div class="eyebrow">PLANIFICACIÓN</div><h1>Calendario</h1><span>Organiza trabajos, sesiones y entregas.</span></div>
+    <div class="calendar-controls">
+      <button class="nav-btn" (click)="previousMonth()">‹</button>
+      <button class="today-btn" (click)="goToday()">Hoy</button>
+      <button class="nav-btn" (click)="nextMonth()">›</button>
+      <h2>{{ currentMonthName }} {{ currentYear }}</h2>
+    </div>
+    <button class="new-event">＋ Nuevo evento</button>
+  </header>
+
+  <div class="calendar-container">
+    <div class="calendar-grid">
+      @for (day of weekDays; track day) { <div class="day-header">{{ day.slice(0,3) }}</div> }
+      @for (day of calendarDays; track day.getTime()) {
+        <div class="day" (click)="selectDay(day)" [class.selected]="isSelected(day)" [class.other-month]="!isCurrentMonth(day)">
+          <span class="number">{{ day.getDate() }}</span>
+          @for (event of getEvents(day); track event.title) { <div class="event" [class]="'event ' + event.color"><strong>{{ event.title }}</strong><small>{{ event.hour }}</small></div> }
+        </div>
+      }
+    </div>
+
+    <aside class="calendar-sidebar">
+      <div class="side-date"><span>SELECCIONADO</span><h2>{{ selectedDay.getDate() }} {{ months[selectedDay.getMonth()] }}</h2><small>{{ selectedDay.getFullYear() }}</small></div>
+      <div class="timeline">
+        @for (event of events; track event.title) {
+          <div class="timeline-event">
+            <div class="hour">{{ event.hour }}</div>
+            <div class="timeline-card" [class]="'timeline-card ' + event.color"><span>{{ event.color === 'document' ? 'Documento' : event.color === 'homework' ? 'Entrega' : 'Estudio' }}</span><h3>{{ event.title }}</h3><p>{{ event.description }}</p></div>
+          </div>
+        }
+      </div>
+      <button class="sidebar-button">＋ Agregar evento</button>
+    </aside>
+  </div>
+</div>
