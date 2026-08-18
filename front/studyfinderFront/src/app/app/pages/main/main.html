@@ -1,91 +1,50 @@
-<header>
-
+<div class="dashboard-page">
+  <section class="welcome-row">
     <div>
-
-        <h1>Bienvenido 👋</h1>
-
-        <p>Organiza tu aprendizaje de forma inteligente.</p>
-
+      <div class="eyebrow">TU ESPACIO DE APRENDIZAJE</div>
+      <h1>Bienvenido <span>👋</span></h1>
+      <p>Todo lo que necesitas para estudiar, organizado en un solo lugar.</p>
     </div>
+    <button class="primary-button"><span>＋</span> Nueva sesión</button>
+  </section>
 
-    <button>
+  <section class="stats-grid">
+    <article class="stat-card">
+      <div class="stat-icon blue">◷</div>
+      <div><span class="stat-label">Horas estudiadas</span><strong>24 <small>h</small></strong><em>+12% esta semana</em></div>
+    </article>
+    <article class="stat-card">
+      <div class="stat-icon cyan">✦</div>
+      <div><span class="stat-label">Racha actual</span><strong>14 <small>días</small></strong><em>Tu mejor: 21 días</em></div>
+    </article>
+    <article class="stat-card">
+      <div class="stat-icon violet">▦</div>
+      <div><span class="stat-label">Materias activas</span><strong>6</strong><em>8 documentos nuevos</em></div>
+    </article>
+    <article class="stat-card">
+      <div class="stat-icon green">↗</div>
+      <div><span class="stat-label">Progreso semanal</span><strong>82<small>%</small></strong><em>+7% frente a la semana anterior</em></div>
+    </article>
+  </section>
 
-        + Nueva sesión
+  <section class="main-grid">
+    <article class="glass-panel continue-panel">
+      <div class="panel-heading"><div><span class="eyebrow">RETOMAR</span><h2>Continúa estudiando</h2></div><button class="ghost-button">Ver todo →</button></div>
+      <div class="course-card">
+        <div class="course-art"><span>∑</span><small>04</small></div>
+        <div class="course-copy"><span class="tag">INGENIERÍA DE SOFTWARE</span><h3>Arquitectura MVC</h3><p>Capítulo 4 · 38 min restantes</p><div class="progress"><span style="width: 72%"></span></div><small>72% completado</small></div>
+        <button class="play-button">Continuar <span>→</span></button>
+      </div>
+    </article>
 
-    </button>
-
-</header>
-
-<section class="cards">
-
-    <div class="card">
-
-        <h3>Horas estudiadas</h3>
-
-        <span>24 h</span>
-
-    </div>
-
-    <div class="card">
-
-        <h3>Racha</h3>
-
-        <span>14 días</span>
-
-    </div>
-
-    <div class="card">
-
-        <h3>Materias</h3>
-
-        <span>6</span>
-
-    </div>
-
-    <div class="card">
-
-        <h3>Progreso</h3>
-
-        <span>82%</span>
-
-    </div>
-
-</section>
-
-<section class="bottom">
-
-    <div class="panel">
-
-        <h2>Continuar estudiando</h2>
-
-        <div class="course">
-
-            <h3>Ingeniería de Software</h3>
-
-            <p>Capítulo 4 - Arquitectura MVC</p>
-
-            <button>Continuar</button>
-
-        </div>
-
-    </div>
-
-    <div class="panel">
-
-        <h2>Próximas tareas</h2>
-
-        <ul>
-
-            <li>✔ Matemáticas</li>
-
-            <li>✔ Física</li>
-
-            <li>✔ Programación</li>
-
-            <li>✔ Inglés</li>
-
-        </ul>
-
-    </div>
-
-</section>
+    <article class="glass-panel tasks-panel">
+      <div class="panel-heading"><div><span class="eyebrow">HOY</span><h2>Próximas tareas</h2></div><button class="circle-button">＋</button></div>
+      <div class="task-list">
+        <div class="task-item"><span class="task-check done">✓</span><div><strong>Matemáticas</strong><small>Integrales dobles</small></div><time>10:00</time></div>
+        <div class="task-item"><span class="task-check"> </span><div><strong>Física</strong><small>Entrega laboratorio</small></div><time>14:00</time></div>
+        <div class="task-item"><span class="task-check"> </span><div><strong>Programación</strong><small>Práctica de Angular</small></div><time>18:00</time></div>
+        <div class="task-item"><span class="task-check"> </span><div><strong>Inglés</strong><small>Vocabulario unidad 3</small></div><time>Mañana</time></div>
+      </div>
+    </article>
+  </section>
+</div>

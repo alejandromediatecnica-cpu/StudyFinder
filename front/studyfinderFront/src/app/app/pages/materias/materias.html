@@ -1,41 +1,37 @@
-@if (materiaSeleccionada(); as materia) {
-  <header>
-    <div>
-      <button class="back" (click)="volver()">← Volver</button>
-      <h1>{{ materia.nombre }}</h1>
-      <p>{{ materia.documentos.length }} documentos</p>
-    </div>
-    <button>+ Subir documento</button>
-  </header>
-
-  <section class="documentos-list">
-    @for (doc of materia.documentos; track doc.id) {
-      <div class="documento-row">
-        <span class="doc-icon">{{ iconoPorTipo(doc.tipo) }}</span>
-        <div class="doc-info">
-          <h4>{{ doc.nombre }}</h4>
-          <p>{{ doc.fecha }} • {{ doc.tamano }}</p>
+<div class="page-shell">
+  @if (materiaSeleccionada(); as materia) {
+    <header class="page-header">
+      <div>
+        <button class="back-button" (click)="volver()">← Volver a materias</button>
+        <div class="eyebrow">MATERIA</div>
+        <h1>{{ materia.nombre }}</h1>
+        <p>{{ materia.documentos.length }} documentos disponibles</p>
+      </div>
+      <button class="primary-button">＋ Subir documento</button>
+    </header>
+    <section class="documents-list">
+      @for (doc of materia.documentos; track doc.id) {
+        <div class="document-row">
+          <span class="doc-icon">{{ iconoPorTipo(doc.tipo) }}</span>
+          <div class="doc-info"><strong>{{ doc.nombre }}</strong><span>{{ doc.fecha }} · {{ doc.tamano }}</span></div>
+          <span class="doc-type">{{ doc.tipo.toUpperCase() }}</span>
+          <button class="open-button">Abrir →</button>
         </div>
-        <button class="doc-action">Abrir</button>
-      </div>
-    }
-  </section>
-} @else {
-  <header>
-    <div>
-      <h1>Mis materias</h1>
-      <p>Organiza tus documentos por materia.</p>
+      }
+    </section>
+  } @else {
+    <header class="page-header">
+      <div><div class="eyebrow">BIBLIOTECA</div><h1>Mis materias</h1><p>Encuentra tus apuntes y documentos rápidamente.</p></div>
+      <button class="primary-button">＋ Nueva materia</button>
+    </header>
+    <div class="materias-grid">
+      @for (materia of materias(); track materia.id) {
+        <article class="materia-card" (click)="seleccionarMateria(materia)">
+          <div class="materia-top"><span class="subject-icon">{{ materia.nombre.charAt(0) }}</span><span class="arrow">↗</span></div>
+          <h3>{{ materia.nombre }}</h3><p>{{ materia.documentos.length }} documentos</p>
+          <div class="card-footer"><span>Biblioteca</span><button (click)="$event.stopPropagation(); seleccionarMateria(materia)">Ver documentos</button></div>
+        </article>
+      }
     </div>
-    <button>+ Nueva materia</button>
-  </header>
-
-  <section class="materias-grid">
-    @for (materia of materias(); track materia.id) {
-      <div class="materia-card">
-        <h3>{{ materia.nombre }}</h3>
-        <p>{{ materia.documentos.length }} documentos</p>
-        <button (click)="seleccionarMateria(materia)">Ver documentos</button>
-      </div>
-    }
-  </section>
-}
+  }
+</div>
