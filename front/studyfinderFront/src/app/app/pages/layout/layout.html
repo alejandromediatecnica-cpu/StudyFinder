@@ -12,61 +12,209 @@
     </div>
 
     <div class="sidebar-label">Workspace</div>
+
     <nav>
-      <a routerLink="/main" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-        <span class="nav-icon">⌂</span><span>Inicio</span>
+      <a
+        routerLink="/main"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        <span class="nav-icon">⌂</span>
+        <span>Inicio</span>
       </a>
+
       <a routerLink="/materias" routerLinkActive="active">
-        <span class="nav-icon">▦</span><span>Mis materias</span>
+        <span class="nav-icon">▦</span>
+        <span>Mis materias</span>
       </a>
+
       <a routerLink="/calendario" routerLinkActive="active">
-        <span class="nav-icon">□</span><span>Calendario</span>
+        <span class="nav-icon">□</span>
+        <span>Calendario</span>
       </a>
+
       <a routerLink="/tareas" routerLinkActive="active">
-        <span class="nav-icon">✓</span><span>Tareas</span>
+        <span class="nav-icon">✓</span>
+        <span>Tareas</span>
       </a>
+
       <a routerLink="/ia" routerLinkActive="active">
-        <span class="nav-icon">✦</span><span>Study AI</span>
+        <span class="nav-icon">✦</span>
+        <span>Study AI</span>
       </a>
+
       <a routerLink="/estadisticas" routerLinkActive="active">
-        <span class="nav-icon">◒</span><span>Estadísticas</span>
+        <span class="nav-icon">◒</span>
+        <span>Estadísticas</span>
       </a>
     </nav>
 
     <div class="sidebar-bottom">
       <a routerLink="/configuracion" routerLinkActive="active">
-        <span class="nav-icon">⚙</span><span>Configuración</span>
+        <span class="nav-icon">⚙</span>
+        <span>Configuración</span>
       </a>
+
       <div class="profile-mini">
         <div class="avatar">A</div>
+
         <div>
           <strong>Estudiante</strong>
           <span>Cuenta personal</span>
         </div>
+
         <span class="profile-dot"></span>
       </div>
     </div>
   </aside>
 
   <main class="content-area">
+
     <header class="topbar">
+
       <div class="breadcrumb">
         <span>StudyFinder</span>
         <b>/</b>
         <span>Workspace</span>
       </div>
-      <div class="topbar-actions">
-        <button class="icon-button" aria-label="Notificaciones">♢</button>
-        <button class="user-button">
-          <span class="avatar small">A</span>
-          <span>Mi perfil</span>
-          <span class="chevron">⌄</span>
-        </button>
+
+
+      <!-- ========================= -->
+      <!-- BARRA DE BÚSQUEDA -->
+      <!-- ========================= -->
+
+      <div class="search-container">
+
+        <div class="search-box" #searchBox>
+
+          <span class="search-icon">⌕</span>
+
+          <input
+            type="text"
+            placeholder="Buscar documentos, materias..."
+            [(ngModel)]="searchQuery"
+            (ngModelChange)="onSearchInput($event)"
+            (keydown)="onSearchKeydown($event)"
+          />
+
+          <button
+            class="search-button"
+            (click)="search()"
+            [disabled]="searching"
+            *ngIf="false"
+          >
+            {{ searching ? '...' : 'Buscar' }}
+          </button>
+
+        </div>
+
+
+        <!-- ========================= -->
+        <!-- RESULTADOS DE BÚSQUEDA -->
+        <!-- ========================= -->
+
+        <div
+          class="search-results"
+          *ngIf="showResults"
+        >
+
+          <!-- Buscando -->
+          <div
+            class="search-loading"
+            *ngIf="searching"
+          >
+            Buscando documentos...
+          </div>
+
+
+          <!-- Error -->
+          <div
+            class="search-error"
+            *ngIf="error"
+          >
+            {{ error }}
+          </div>
+
+
+          <!-- Sin resultados -->
+          <div
+            class="no-results"
+            *ngIf="!searching && !error && searchResults.length === 0"
+          >
+            No encontramos resultados.
+          </div>
+
+
+          <!-- Resultados -->
+          <a
+            *ngFor="let result of searchResults"
+            class="search-result"
+            [href]="result.url || '#'"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+
+            <div class="result-content">
+
+              <h3>
+                {{ result.title || 'Sin título' }}
+              </h3>
+
+              <p *ngIf="result.authors?.length">
+                {{ result.authors.join(', ') }}
+              </p>
+
+              <span *ngIf="result.year">
+                {{ result.year }}
+              </span>
+
+            </div>
+
+          </a>
+
+        </div>
+
       </div>
+
+
+      <!-- ========================= -->
+      <!-- ACCIONES DE LA BARRA -->
+      <!-- ========================= -->
+
+      <div class="topbar-actions">
+
+        <button
+          class="icon-button"
+          aria-label="Notificaciones"
+        >
+          ♢
+        </button>
+
+        <button class="user-button">
+
+          <span class="avatar small">
+            A
+          </span>
+
+          <span>
+            Mi perfil
+          </span>
+
+          <span class="chevron">
+            ⌄
+          </span>
+
+        </button>
+
+      </div>
+
     </header>
+
 
     <section class="page-content">
       <router-outlet></router-outlet>
     </section>
+
   </main>
+
 </div>

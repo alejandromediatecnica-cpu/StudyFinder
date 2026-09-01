@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from services.document_service import search_documents
+from app.services.document_service import search_documents
 
 router = APIRouter()
 

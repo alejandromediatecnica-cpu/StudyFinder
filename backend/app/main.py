@@ -1,27 +1,27 @@
+import sys
+from pathlib import Path
+
+# Asegurar que backend sea el root para imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.middleware.cors import CORSMiddleware
+from app.api.search import router as search_router
 
-from api.search import router as search_router
+app = FastAPI(title="StudyFinder API")
 
-app = FastAPI(
-    title="StudyFinder API",
-    version="1.0.0"
+# Configuración obligatoria de CORS para conectar con el Frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:4200", "http://127.0.0.1:4200"],  # Direcciones comunes de Angular
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-# Archivos estáticos (HTML, CSS, JS, imágenes...), //Recorderis
-app.mount("/static", StaticFiles(directory="static"), name="static")
-
-# Rutas de la API, //Recorderis
+# Incluir tus rutas existentes
 app.include_router(search_router)
 
 @app.get("/")
-def home():
-    return {
-        "message": "StudyFinder Backend funcionando"
-    }
-
-# Ruta que muestra la página HTML, //Recorderis
-@app.get("/home")
-def home_page():
-    return FileResponse("static/index.html")
+def read_root():
+    return {"message": "Backend de StudyFinder operando correctamente"}
