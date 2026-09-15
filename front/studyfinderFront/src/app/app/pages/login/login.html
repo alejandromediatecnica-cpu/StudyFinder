@@ -1,0 +1,24 @@
+<div class="auth-page">
+  <section class="auth-card" aria-labelledby="login-title">
+    <div class="auth-mark">S</div>
+    <div class="eyebrow">VUELVE A TU RITMO</div>
+    <h1 id="login-title">Bienvenido de nuevo</h1>
+    <p class="auth-intro">Continúa organizando tus estudios desde un solo lugar.</p>
+
+    <form (ngSubmit)="submit()" #loginForm="ngForm">
+      <label for="login-email">Correo electrónico</label>
+      <input id="login-email" name="email" type="email" [(ngModel)]="email" placeholder="tu@correo.com" required>
+
+      <div class="field-heading">
+        <label for="login-password">Contraseña</label>
+        <a href="#">¿La olvidaste?</a>
+      </div>
+      <input id="login-password" name="password" type="password" [(ngModel)]="password" placeholder="••••••••" required>
+
+      <button class="submit-button" type="submit" [disabled]="loginForm.invalid">Entrar a StudyFinder</button>
+    </form>
+
+    <p class="auth-switch">¿Aún no tienes cuenta? <a routerLink="/signup">Crea una gratis</a></p>
+    <p class="form-message" *ngIf="submitted">Listo, estamos preparando tu espacio.</p>
+  </section>
+</div>

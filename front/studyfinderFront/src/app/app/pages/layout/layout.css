@@ -83,7 +83,7 @@ nav a.active, .sidebar-bottom > a.active {
 .breadcrumb { display: flex; align-items: center; gap: 9px; color: #73819b; font-size: 12px; }
 .breadcrumb span:first-child { color: #d7deeb; font-weight: 600; }
 .breadcrumb b { color: #3d4a62; font-weight: 500; }
-.topbar-actions { display: flex; align-items: center; gap: 10px; }
+.topbar-actions { position: relative; z-index: 40; display: flex; align-items: center; gap: 10px; }
 .icon-button, .user-button { color: #c5cede; background: rgba(255,255,255,.045); border: 1px solid var(--border); cursor: pointer; }
 .icon-button { width: 38px; height: 38px; border-radius: 12px; }
 .user-button { min-height: 40px; padding: 4px 10px 4px 5px; border-radius: 13px; display: flex; align-items: center; gap: 8px; font-size: 12px; }
@@ -114,6 +114,8 @@ nav a.active, .sidebar-bottom > a.active {
   nav a:nth-child(6) { display: none; }
   .content-area { min-height: 100vh; }
   .topbar { height: 64px; }
+  .topbar-actions { gap: 5px; }
+  .topbar-actions .icon-button, .topbar-actions .user-button { display: none; }
   .breadcrumb { display: none; }
   .page-content { height: calc(100vh - 64px); padding-bottom: 95px; }
 }

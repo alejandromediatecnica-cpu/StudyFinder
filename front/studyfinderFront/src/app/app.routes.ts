@@ -7,6 +7,8 @@ import { TareasComponent } from './app/pages/tareas/tareas';
 import { IaComponent } from './app/pages/ia/ia';
 import { EstadisticasComponent } from './app/pages/estadisticas/estadisticas';
 import { ConfiguracionComponent } from './app/pages/configuracion/configuracion';
+import { LoginComponent } from './app/pages/login/login';
+import { SignupComponent } from './app/pages/signup/signup';
 
 export const routes: Routes = [
   {
@@ -21,6 +23,8 @@ export const routes: Routes = [
       { path: 'ia', component: IaComponent },
       { path: 'estadisticas', component: EstadisticasComponent },
       { path: 'configuracion', component: ConfiguracionComponent },
+      { path: 'login', component: LoginComponent },
+      { path: 'signup', component: SignupComponent },
     ]
   },
   { path: '**', redirectTo: 'main' }

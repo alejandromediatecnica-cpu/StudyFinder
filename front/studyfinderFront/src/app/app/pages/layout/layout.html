@@ -183,6 +183,14 @@
 
       <div class="topbar-actions">
 
+        <a class="auth-link" routerLink="/login" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+          Entrar
+        </a>
+
+        <a class="auth-link primary" routerLink="/signup" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+          Crear cuenta
+        </a>
+
         <button
           class="icon-button"
           aria-label="Notificaciones"

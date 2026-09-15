@@ -1,0 +1,24 @@
+<div class="auth-page">
+  <section class="auth-card" aria-labelledby="signup-title">
+    <div class="auth-mark">S</div>
+    <div class="eyebrow">EMPIEZA A AVANZAR</div>
+    <h1 id="signup-title">Crea tu cuenta</h1>
+    <p class="auth-intro">Tu próximo gran avance empieza con un plan sencillo.</p>
+
+    <form (ngSubmit)="submit()" #signupForm="ngForm">
+      <label for="signup-name">Nombre</label>
+      <input id="signup-name" name="name" type="text" [(ngModel)]="name" placeholder="Tu nombre" required>
+
+      <label for="signup-email">Correo electrónico</label>
+      <input id="signup-email" name="email" type="email" [(ngModel)]="email" placeholder="tu@correo.com" required>
+
+      <label for="signup-password">Contraseña</label>
+      <input id="signup-password" name="password" type="password" [(ngModel)]="password" placeholder="Crea una contraseña" minlength="6" required>
+
+      <button class="submit-button" type="submit" [disabled]="signupForm.invalid">Crear mi cuenta</button>
+    </form>
+
+    <p class="auth-switch">¿Ya tienes cuenta? <a routerLink="/login">Entra aquí</a></p>
+    <p class="form-message" *ngIf="submitted">Tu espacio de estudio está casi listo.</p>
+  </section>
+</div>
