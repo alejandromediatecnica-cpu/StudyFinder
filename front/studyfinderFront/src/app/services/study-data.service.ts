@@ -15,6 +15,8 @@ interface StudyData {
   savedDocuments: SavedDocument[];
   uploadedFiles: string[];
   studySessions: number;
+  customMaterias: string[];
+  deletedMateriaIds: number[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -30,7 +32,7 @@ export class StudyDataService {
   private read(): StudyData {
     if (typeof localStorage === 'undefined') return this.empty();
     const stored = localStorage.getItem(this.key());
-    return stored ? JSON.parse(stored) as StudyData : this.empty();
+    return stored ? { ...this.empty(), ...JSON.parse(stored) } as StudyData : this.empty();
   }
 
   private write(data: StudyData): void {
@@ -38,7 +40,7 @@ export class StudyDataService {
   }
 
   private empty(): StudyData {
-    return { searches: 0, savedDocuments: [], uploadedFiles: [], studySessions: 0 };
+    return { searches: 0, savedDocuments: [], uploadedFiles: [], studySessions: 0, customMaterias: [], deletedMateriaIds: [] };
   }
 
   recordSearch(): void {
@@ -80,5 +82,27 @@ export class StudyDataService {
 
   getStats(): StudyData {
     return this.read();
+  }
+
+  addMateria(name: string): void {
+    const data = this.read();
+    data.customMaterias = [...data.customMaterias, name];
+    this.write(data);
+  }
+
+  removeMateria(id: number): void {
+    const data = this.read();
+    if (id >= 1000) {
+      const customIndex = id - 1000;
+      data.customMaterias = data.customMaterias.filter((_, index) => index !== customIndex);
+    } else if (!data.deletedMateriaIds.includes(id)) {
+      data.deletedMateriaIds = [...data.deletedMateriaIds, id];
+    }
+    this.write(data);
+  }
+
+  getMateriaChanges(): Pick<StudyData, 'customMaterias' | 'deletedMateriaIds'> {
+    const data = this.read();
+    return { customMaterias: data.customMaterias, deletedMateriaIds: data.deletedMateriaIds };
   }
 }

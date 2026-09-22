@@ -5,8 +5,8 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
 import { SearchService } from '../../../services/search.service';
 import { AuthService, AuthUser } from '../../../services/auth.service';
 import { StudyDataService } from '../../../services/study-data.service';
-import { Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, filter, switchMap, takeUntil } from 'rxjs/operators';
+import { Subject, of } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, switchMap, takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-layout',
@@ -46,17 +46,30 @@ export class LayoutComponent implements OnInit, OnDestroy {
     this.searchSubject.pipe(
       debounceTime(300),
       distinctUntilChanged(),
-      filter(term => term.trim().length > 0),
       switchMap(term => {
+        if (!term.trim()) {
+          this.searching = false;
+          this.showResults = false;
+          this.searchResults = [];
+          this.error = null;
+          return of([]);
+        }
         this.studyData.recordSearch();
         this.searching = true;
         this.showResults = true;
         this.error = null;
-        return this.searchService.searchDocuments(term);
+        return this.searchService.searchDocuments(term).pipe(
+          catchError(() => {
+            this.searching = false;
+            this.error = 'No se pudo realizar la búsqueda.';
+            return of(null);
+          })
+        );
       }),
       takeUntil(this.destroy$)
     ).subscribe({
       next: (response: any) => {
+        if (response === null) return;
         this.results = Array.isArray(response) ? response : response?.results || response?.items || [];
         this.searchResults = this.results;
         this.searching = false;
@@ -81,6 +94,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
     this.searchQuery = term;
     
     if (!term.trim()) {
+      this.searching = false;
       this.showResults = false;
       this.searchResults = [];
       this.error = null;

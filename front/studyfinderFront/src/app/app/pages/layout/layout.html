@@ -93,7 +93,7 @@
             type="text"
             placeholder="Buscar documentos, materias..."
             [(ngModel)]="searchQuery"
-            (ngModelChange)="onSearchInput($event)"
+            (input)="onSearchInput($any($event.target).value)"
             (keydown)="onSearchKeydown($event)"
           />
 
@@ -115,6 +115,7 @@
 
         <div
           class="search-results"
+          [class.search-results-empty]="!searching && !error && !searchResults.length"
           *ngIf="showResults"
         >
 

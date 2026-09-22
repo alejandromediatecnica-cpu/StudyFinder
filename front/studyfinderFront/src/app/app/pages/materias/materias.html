@@ -46,8 +46,14 @@
   } @else {
     <header class="page-header">
       <div><div class="eyebrow">BIBLIOTECA</div><h1>Mis materias</h1><p>Encuentra tus apuntes y documentos rápidamente.</p></div>
-      <button class="primary-button">＋ Nueva materia</button>
+      <button class="primary-button" type="button" (click)="showNewMateria = !showNewMateria">＋ Nueva materia</button>
     </header>
+    <form class="new-materia-form" *ngIf="showNewMateria" (ngSubmit)="crearMateria()">
+      <input name="newMateriaName" [(ngModel)]="newMateriaName" placeholder="Nombre de la materia" autofocus>
+      <button class="primary-button" type="submit">Agregar</button>
+      <button class="cancel-button" type="button" (click)="showNewMateria = false">Cancelar</button>
+      <span class="materia-error" *ngIf="materiaError">{{ materiaError }}</span>
+    </form>
     <div class="materias-grid">
       @for (materia of materias(); track materia.id) {
         <article class="materia-card" (click)="seleccionarMateria(materia)">

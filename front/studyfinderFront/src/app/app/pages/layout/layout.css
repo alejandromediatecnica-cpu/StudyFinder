@@ -511,3 +511,4 @@ nav a.active, .sidebar-bottom > a.active {
   }
 
 }
+.search-results-empty { display: none; }

@@ -82,11 +82,38 @@ export class MateriasComponent {
   previewDocument: any = null;
   searching = false;
   searchError = '';
+  showNewMateria = false;
+  newMateriaName = '';
+  materiaError = '';
 
-  constructor(private searchService: SearchService, private studyData: StudyDataService) {}
+  constructor(private searchService: SearchService, private studyData: StudyDataService) {
+    const changes = this.studyData.getMateriaChanges();
+    this.materias.update(items => [
+      ...items.filter(item => !changes.deletedMateriaIds.includes(item.id)),
+      ...changes.customMaterias.map((nombre, index) => ({ id: 1000 + index, nombre, documentos: [] }))
+    ]);
+  }
 
   seleccionarMateria(materia: Materia) {
     this.materiaSeleccionada.set(materia);
+  }
+
+  crearMateria(): void {
+    const nombre = this.newMateriaName.trim();
+    if (!nombre) {
+      this.materiaError = 'Escribe un nombre para la materia.';
+      return;
+    }
+    if (this.materias().some(materia => materia.nombre.toLowerCase() === nombre.toLowerCase())) {
+      this.materiaError = 'Ya existe una materia con ese nombre.';
+      return;
+    }
+    const id = Math.max(0, ...this.materias().map(materia => materia.id)) + 1;
+    this.materias.update(items => [...items, { id, nombre, documentos: [] }]);
+    this.studyData.addMateria(nombre);
+    this.newMateriaName = '';
+    this.materiaError = '';
+    this.showNewMateria = false;
   }
 
   volver() {
@@ -140,6 +167,7 @@ export class MateriasComponent {
   eliminarMateria(materia: Materia, event: MouseEvent): void {
     event.stopPropagation();
     this.materias.update(items => items.filter(item => item.id !== materia.id));
+    this.studyData.removeMateria(materia.id);
     if (this.materiaSeleccionada()?.id === materia.id) this.volver();
   }
 
