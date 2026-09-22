@@ -4,14 +4,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-MONGODB_URL = os.getenv("MONGODB_URL")
-MONGODB_DATABASE = os.getenv("MONGODB_DATABASE")
-
-if not MONGODB_URL:
-    raise ValueError("No se encontró MONGODB_URL en el archivo .env")
-
-if not MONGODB_DATABASE:
-    raise ValueError("No se encontró MONGODB_DATABASE en el archivo .env")
+MONGODB_URL = os.getenv("MONGODB_URL", "mongodb://localhost:27017")
+MONGODB_DATABASE = os.getenv("MONGODB_DATABASE", "studyfinder_log")
 
 client = MongoClient(
     MONGODB_URL,
