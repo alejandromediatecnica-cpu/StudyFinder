@@ -12,8 +12,8 @@
 
     <div class="nav-actions">
       <ng-container *ngIf="!user; else landingAccount">
-        <a class="login-link" routerLink="/login">Entrar</a>
-        <a class="signup-button" routerLink="/signup">Crear cuenta <span>↗</span></a>
+        <a class="login-link" [routerLink]="user ? '/main' : '/login'">Entrar</a>
+        <a class="signup-button" [routerLink]="user ? '/main' : '/signup'">Crear cuenta <span>↗</span></a>
       </ng-container>
       <ng-template #landingAccount>
         <div class="landing-account">
@@ -34,7 +34,7 @@
         <h1>Tu camino académico, <em>más claro.</em></h1>
         <p class="hero-description">StudyFinder reúne tus materias, tareas y metas en un espacio creado para que estudies con intención y avances a tu propio ritmo.</p>
         <div class="hero-actions">
-          <a class="primary-button" routerLink="/signup">Comenzar ahora <span>→</span></a>
+          <a class="primary-button" [routerLink]="user ? '/main' : '/signup'">Comenzar ahora <span>→</span></a>
           <a class="text-button" href="#colegio">Conoce StudyFinder <span>↓</span></a>
         </div>
         <div class="hero-proof"><span class="proof-avatars"><i>SF</i><i>+</i><i>4</i></span><span>Un espacio hecho para nuestra comunidad académica</span></div>
