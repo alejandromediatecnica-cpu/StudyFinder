@@ -19,7 +19,7 @@
     </form>
 
     <p class="auth-switch">¿Aún no tienes cuenta? <a routerLink="/signup">Crea una gratis</a></p>
-    <p class="form-message" *ngIf="submitted && !error">Listo, estamos preparando tu espacio.</p>
+    <p class="form-message" *ngIf="success">Listo, estamos preparando tu espacio.</p>
     <p class="form-error" *ngIf="error">{{ error }}</p>
   </section>
 </div>

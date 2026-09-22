@@ -19,7 +19,7 @@
     </form>
 
     <p class="auth-switch">¿Ya tienes cuenta? <a routerLink="/login">Entra aquí</a></p>
-    <p class="form-message" *ngIf="submitted && !error">Tu espacio de estudio está casi listo.</p>
+    <p class="form-message" *ngIf="success">Tu espacio de estudio está casi listo.</p>
     <p class="form-error" *ngIf="error">{{ error }}</p>
   </section>
 </div>

@@ -13,7 +13,11 @@ if not MONGODB_URL:
 if not MONGODB_DATABASE:
     raise ValueError("No se encontró MONGODB_DATABASE en el archivo .env")
 
-client = MongoClient(MONGODB_URL)
+client = MongoClient(
+    MONGODB_URL,
+    serverSelectionTimeoutMS=5000,
+    connectTimeoutMS=5000,
+)
 
 db = client[MONGODB_DATABASE]
 

@@ -16,6 +16,7 @@ export class LoginComponent {
   email = '';
   password = '';
   submitted = false;
+  success = false;
   loading = false;
   error = '';
 
@@ -23,13 +24,20 @@ export class LoginComponent {
 
   submit(): void {
     this.submitted = true;
+    this.success = false;
     this.loading = true;
     this.error = '';
     this.authService.login(this.email, this.password).subscribe({
-      next: () => this.router.navigate(['/main']),
+      next: () => {
+        this.loading = false;
+        this.success = true;
+        this.router.navigate(['/main']);
+      },
       error: error => {
         this.loading = false;
-        this.error = error.error?.detail || 'No se pudo iniciar sesion.';
+        this.error = error.name === 'TimeoutError'
+          ? 'El servidor tardo demasiado. Verifica que MongoDB y el backend esten activos.'
+          : error.error?.detail || 'No se pudo iniciar sesion.';
       }
     });
   }
