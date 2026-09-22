@@ -16,7 +16,7 @@ import { catchError, debounceTime, distinctUntilChanged, switchMap, takeUntil } 
   styleUrls: ['./layout.css']
 })
 export class LayoutComponent implements OnInit, OnDestroy {
-  @ViewChild('searchBox') searchBox!: ElementRef;
+  @ViewChild('searchContainer') searchContainer!: ElementRef;
 
   searchTerm: string = '';
   searchQuery: string = '';
@@ -34,7 +34,6 @@ export class LayoutComponent implements OnInit, OnDestroy {
 
   constructor(
     public searchService: SearchService,
-    private elementRef: ElementRef,
     private authService: AuthService,
     private studyData: StudyDataService,
     private router: Router
@@ -118,7 +117,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
     
-    if (!this.elementRef.nativeElement.contains(target)) {
+    if (!this.searchContainer?.nativeElement.contains(target)) {
       this.showResults = false;
       this.profileMenuOpen = false;
     }

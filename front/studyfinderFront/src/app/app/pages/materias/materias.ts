@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { SearchService } from '../../../services/search.service';
-import { StudyDataService, SavedDocument } from '../../../services/study-data.service';
+import { StudyDataService, SavedDocument, CustomMateria } from '../../../services/study-data.service';
 
 interface Documento {
   id: number;
@@ -16,6 +16,7 @@ interface Documento {
 interface Materia {
   id: number;
   nombre: string;
+  descripcion?: string;
   documentos: Documento[];
 }
 
@@ -84,13 +85,17 @@ export class MateriasComponent {
   searchError = '';
   showNewMateria = false;
   newMateriaName = '';
+  newMateriaDescription = '';
   materiaError = '';
 
   constructor(private searchService: SearchService, private studyData: StudyDataService) {
     const changes = this.studyData.getMateriaChanges();
     this.materias.update(items => [
       ...items.filter(item => !changes.deletedMateriaIds.includes(item.id)),
-      ...changes.customMaterias.map((nombre, index) => ({ id: 1000 + index, nombre, documentos: [] }))
+      ...changes.customMaterias.map((materia, index) => {
+        const custom = typeof materia === 'string' ? { name: materia, description: '' } : materia as CustomMateria;
+        return { id: 1000 + index, nombre: custom.name, descripcion: custom.description, documentos: [] };
+      })
     ]);
   }
 
@@ -108,10 +113,12 @@ export class MateriasComponent {
       this.materiaError = 'Ya existe una materia con ese nombre.';
       return;
     }
-    const id = Math.max(0, ...this.materias().map(materia => materia.id)) + 1;
-    this.materias.update(items => [...items, { id, nombre, documentos: [] }]);
-    this.studyData.addMateria(nombre);
+    const id = 1000 + this.studyData.getMateriaChanges().customMaterias.length;
+    const descripcion = this.newMateriaDescription.trim();
+    this.materias.update(items => [...items, { id, nombre, descripcion, documentos: [] }]);
+    this.studyData.addMateria(nombre, descripcion);
     this.newMateriaName = '';
+    this.newMateriaDescription = '';
     this.materiaError = '';
     this.showNewMateria = false;
   }

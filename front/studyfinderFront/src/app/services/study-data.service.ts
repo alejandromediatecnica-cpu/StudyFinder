@@ -10,12 +10,17 @@ export interface SavedDocument {
   savedAt: string;
 }
 
+export interface CustomMateria {
+  name: string;
+  description: string;
+}
+
 interface StudyData {
   searches: number;
   savedDocuments: SavedDocument[];
   uploadedFiles: string[];
   studySessions: number;
-  customMaterias: string[];
+  customMaterias: Array<string | CustomMateria>;
   deletedMateriaIds: number[];
 }
 
@@ -84,9 +89,9 @@ export class StudyDataService {
     return this.read();
   }
 
-  addMateria(name: string): void {
+  addMateria(name: string, description: string): void {
     const data = this.read();
-    data.customMaterias = [...data.customMaterias, name];
+    data.customMaterias = [...data.customMaterias, { name, description }];
     this.write(data);
   }
 

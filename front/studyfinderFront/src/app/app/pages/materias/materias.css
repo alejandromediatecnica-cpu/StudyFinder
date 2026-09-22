@@ -1,5 +1,10 @@
-.new-materia-form { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: -8px 0 22px; padding: 14px; border: 1px solid rgba(120,207,255,.22); border-radius: 14px; background: rgba(255,255,255,.035); }
-.new-materia-form input { flex: 1 1 230px; min-width: 0; height: 40px; padding: 0 12px; color: var(--text); background: rgba(255,255,255,.06); border: 1px solid var(--border); border-radius: 9px; outline: 0; }
+.materia-modal-backdrop { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 20px; background: rgba(2,5,15,.66); backdrop-filter: blur(8px); }
+.new-materia-form { width: min(100%, 430px); display: grid; gap: 10px; padding: 25px; border: 1px solid rgba(120,207,255,.28); border-radius: 18px; background: rgba(9,17,36,.98); box-shadow: 0 24px 70px rgba(0,0,0,.45); }
+.new-materia-form h2 { margin: 0 0 8px; }
+.new-materia-form label { color: #cbd5e7; font-size: 11px; font-weight: 700; }
+.new-materia-form input, .new-materia-form textarea { width: 100%; box-sizing: border-box; padding: 12px; color: var(--text); background: rgba(255,255,255,.06); border: 1px solid var(--border); border-radius: 9px; outline: 0; }
+.new-materia-form textarea { min-height: 90px; resize: vertical; font: inherit; }
+.materia-form-actions { display: flex; gap: 10px; margin-top: 7px; }
 .cancel-button { height: 40px; padding: 0 14px; color: var(--muted); background: transparent; border: 1px solid var(--border); border-radius: 9px; cursor: pointer; }
 .materia-error { flex-basis: 100%; color: #ff9aaa; font-size: 11px; }
 .materia-search { margin: 0 0 24px; padding: 18px; border: 1px solid var(--border); border-radius: 16px; background: rgba(255,255,255,.035); }

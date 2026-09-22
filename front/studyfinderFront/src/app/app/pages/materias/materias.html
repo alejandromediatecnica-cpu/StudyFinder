@@ -48,17 +48,22 @@
       <div><div class="eyebrow">BIBLIOTECA</div><h1>Mis materias</h1><p>Encuentra tus apuntes y documentos rápidamente.</p></div>
       <button class="primary-button" type="button" (click)="showNewMateria = !showNewMateria">＋ Nueva materia</button>
     </header>
-    <form class="new-materia-form" *ngIf="showNewMateria" (ngSubmit)="crearMateria()">
-      <input name="newMateriaName" [(ngModel)]="newMateriaName" placeholder="Nombre de la materia" autofocus>
-      <button class="primary-button" type="submit">Agregar</button>
-      <button class="cancel-button" type="button" (click)="showNewMateria = false">Cancelar</button>
-      <span class="materia-error" *ngIf="materiaError">{{ materiaError }}</span>
-    </form>
+    <div class="materia-modal-backdrop" *ngIf="showNewMateria" (click)="showNewMateria = false">
+      <form class="new-materia-form" (ngSubmit)="crearMateria(); $event.stopPropagation()" (click)="$event.stopPropagation()">
+        <div class="eyebrow">NUEVA MATERIA</div><h2>Organiza otro espacio</h2>
+        <label for="new-materia-name">Nombre</label>
+        <input id="new-materia-name" name="newMateriaName" [(ngModel)]="newMateriaName" placeholder="Ej. Química" autofocus>
+        <label for="new-materia-description">Descripción</label>
+        <textarea id="new-materia-description" name="newMateriaDescription" [(ngModel)]="newMateriaDescription" placeholder="¿Qué vas a estudiar aquí?"></textarea>
+        <div class="materia-form-actions"><button class="primary-button" type="submit">Crear materia</button><button class="cancel-button" type="button" (click)="showNewMateria = false">Cancelar</button></div>
+        <span class="materia-error" *ngIf="materiaError">{{ materiaError }}</span>
+      </form>
+    </div>
     <div class="materias-grid">
       @for (materia of materias(); track materia.id) {
         <article class="materia-card" (click)="seleccionarMateria(materia)">
           <div class="materia-top"><span class="subject-icon">{{ materia.nombre.charAt(0) }}</span><span class="arrow">↗</span></div>
-          <h3>{{ materia.nombre }}</h3><p>{{ materia.documentos.length }} documentos</p>
+          <h3>{{ materia.nombre }}</h3><p>{{ materia.descripcion || 'Tu espacio de estudio' }}</p><p>{{ materia.documentos.length }} documentos</p>
           <div class="card-footer"><span>Biblioteca</span><div><button (click)="$event.stopPropagation(); seleccionarMateria(materia)">Ver documentos</button><button class="delete-button" (click)="eliminarMateria(materia, $event)">Eliminar</button></div></div>
         </article>
       }
