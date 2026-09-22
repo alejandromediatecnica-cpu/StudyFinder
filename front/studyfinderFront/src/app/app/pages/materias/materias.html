@@ -34,12 +34,12 @@
           <span class="doc-icon">{{ iconoPorTipo(doc.tipo) }}</span>
           <div class="doc-info"><strong>{{ doc.nombre }}</strong><span>{{ doc.fecha }} · {{ doc.tamano }}</span></div>
           <span class="doc-type">{{ doc.tipo.toUpperCase() }}</span>
-          <button class="open-button">Abrir →</button>
+          <div class="document-actions"><button class="open-button">Abrir →</button><button class="delete-button" (click)="eliminarDocumento(doc, $event)" aria-label="Eliminar documento">Eliminar</button></div>
         </div>
       }
       @for (doc of documentosGuardados(materia); track doc.id) {
         <div class="document-row saved-document">
-          <span class="doc-icon">🔖</span><div class="doc-info"><strong>{{ doc.title }}</strong><span>Guardado en esta materia</span></div><span class="doc-type">WEB</span><a class="open-button" [href]="doc.url" target="_blank" rel="noopener noreferrer">Abrir →</a>
+          <span class="doc-icon">🔖</span><div class="doc-info"><strong>{{ doc.title }}</strong><span>Guardado en esta materia</span></div><span class="doc-type">WEB</span><div class="document-actions"><a class="open-button" [href]="doc.url" target="_blank" rel="noopener noreferrer">Abrir →</a><button class="delete-button" (click)="eliminarGuardado(doc, $event)">Eliminar</button></div>
         </div>
       }
     </section>
@@ -53,7 +53,7 @@
         <article class="materia-card" (click)="seleccionarMateria(materia)">
           <div class="materia-top"><span class="subject-icon">{{ materia.nombre.charAt(0) }}</span><span class="arrow">↗</span></div>
           <h3>{{ materia.nombre }}</h3><p>{{ materia.documentos.length }} documentos</p>
-          <div class="card-footer"><span>Biblioteca</span><button (click)="$event.stopPropagation(); seleccionarMateria(materia)">Ver documentos</button></div>
+          <div class="card-footer"><span>Biblioteca</span><div><button (click)="$event.stopPropagation(); seleccionarMateria(materia)">Ver documentos</button><button class="delete-button" (click)="eliminarMateria(materia, $event)">Eliminar</button></div></div>
         </article>
       }
     </div>

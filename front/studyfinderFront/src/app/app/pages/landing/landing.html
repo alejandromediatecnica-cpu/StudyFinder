@@ -11,8 +11,19 @@
     </nav>
 
     <div class="nav-actions">
-      <a class="login-link" routerLink="/login">Entrar</a>
-      <a class="signup-button" routerLink="/signup">Crear cuenta <span>↗</span></a>
+      <ng-container *ngIf="!user; else landingAccount">
+        <a class="login-link" routerLink="/login">Entrar</a>
+        <a class="signup-button" routerLink="/signup">Crear cuenta <span>↗</span></a>
+      </ng-container>
+      <ng-template #landingAccount>
+        <div class="landing-account">
+          <button class="account-button" type="button" (click)="toggleAccountMenu()"><span class="landing-avatar">{{ user?.name?.charAt(0)?.toUpperCase() }}</span><span>{{ user?.name }}</span><span>⌄</span></button>
+          <div class="landing-account-menu" *ngIf="accountMenuOpen">
+            <a routerLink="/main" (click)="accountMenuOpen = false">Ir al workspace</a>
+            <button type="button" (click)="logout()">Cerrar sesión</button>
+          </div>
+        </div>
+      </ng-template>
     </div>
   </header>
 

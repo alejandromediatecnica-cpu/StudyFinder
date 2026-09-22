@@ -137,6 +137,27 @@ export class MateriasComponent {
     return this.studyData.getSavedDocuments(materia.nombre);
   }
 
+  eliminarMateria(materia: Materia, event: MouseEvent): void {
+    event.stopPropagation();
+    this.materias.update(items => items.filter(item => item.id !== materia.id));
+    if (this.materiaSeleccionada()?.id === materia.id) this.volver();
+  }
+
+  eliminarDocumento(documento: Documento, event: MouseEvent): void {
+    event.stopPropagation();
+    const materia = this.materiaSeleccionada();
+    if (!materia) return;
+    this.materias.update(items => items.map(item => item.id === materia.id
+      ? { ...item, documentos: item.documentos.filter(document => document.id !== documento.id) }
+      : item));
+    this.materiaSeleccionada.set(this.materias().find(item => item.id === materia.id) || null);
+  }
+
+  eliminarGuardado(documento: SavedDocument, event: MouseEvent): void {
+    event.stopPropagation();
+    this.studyData.removeSavedDocument(documento.id);
+  }
+
   iconoPorTipo(tipo: string): string {
     const iconos: Record<string, string> = {
       pdf: '📄',

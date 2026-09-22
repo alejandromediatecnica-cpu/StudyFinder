@@ -27,6 +27,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
   showResults: boolean = false;
   error: string | null = null;
   user: AuthUser | null = null;
+  profileMenuOpen = false;
 
   private searchSubject = new Subject<string>();
   private destroy$ = new Subject<void>();
@@ -86,6 +87,9 @@ export class LayoutComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.searching = true;
+    this.showResults = true;
+    this.error = null;
     this.searchSubject.next(term);
   }
 
@@ -102,6 +106,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
     
     if (!this.elementRef.nativeElement.contains(target)) {
       this.showResults = false;
+      this.profileMenuOpen = false;
     }
   }
 
@@ -134,5 +139,10 @@ export class LayoutComponent implements OnInit, OnDestroy {
   logout(): void {
     this.authService.logout();
     this.router.navigate(['/']);
+  }
+
+  toggleProfileMenu(event: MouseEvent): void {
+    event.stopPropagation();
+    this.profileMenuOpen = !this.profileMenuOpen;
   }
 }

@@ -1,12 +1,11 @@
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { StudyDataService } from '../../../services/study-data.service';
 
 @Component({
   selector: 'app-main',
   standalone: true,
-  imports: [RouterLink],
+  imports: [],
   templateUrl: './main.html',
   styleUrl: './main.css',
 })

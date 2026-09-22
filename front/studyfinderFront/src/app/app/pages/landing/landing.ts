@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
+import { AuthService, AuthUser } from '../../../services/auth.service';
 
 interface StudentProfile {
   initials: string;
@@ -18,6 +20,8 @@ interface StudentProfile {
   styleUrl: './landing.css'
 })
 export class LandingComponent {
+  user: AuthUser | null = null;
+  accountMenuOpen = false;
   readonly profiles: StudentProfile[] = [
     {
       initials: 'TU',
@@ -51,6 +55,10 @@ export class LandingComponent {
 
   activeProfile = 0;
 
+  constructor(private authService: AuthService, private router: Router) {
+    this.user = this.authService.getUser();
+  }
+
   get activeStudent(): StudentProfile {
     return this.profiles[this.activeProfile];
   }
@@ -65,5 +73,16 @@ export class LandingComponent {
 
   nextProfile(): void {
     this.activeProfile = (this.activeProfile + 1) % this.profiles.length;
+  }
+
+  toggleAccountMenu(): void {
+    this.accountMenuOpen = !this.accountMenuOpen;
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.user = null;
+    this.accountMenuOpen = false;
+    this.router.navigate(['/']);
   }
 }

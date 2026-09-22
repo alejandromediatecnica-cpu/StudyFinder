@@ -198,7 +198,8 @@
           ♢
         </button>
 
-        <button class="user-button" *ngIf="user" (click)="logout()" title="Cerrar sesión">
+        <div class="profile-menu-wrap" *ngIf="user">
+          <button class="user-button" (click)="toggleProfileMenu($event)" title="Abrir menú de cuenta" [attr.aria-expanded]="profileMenuOpen">
 
           <span class="avatar small">
             {{ user?.name?.charAt(0)?.toUpperCase() || 'A' }}
@@ -212,7 +213,13 @@
             ⌄
           </span>
 
-        </button>
+          </button>
+          <div class="profile-menu" *ngIf="profileMenuOpen">
+            <div class="profile-menu-heading"><strong>{{ user.name }}</strong><span>{{ user.email }}</span></div>
+            <a routerLink="/" (click)="profileMenuOpen = false">Ir a la landing</a>
+            <button type="button" (click)="logout()">Cerrar sesión</button>
+          </div>
+        </div>
 
       </div>
 

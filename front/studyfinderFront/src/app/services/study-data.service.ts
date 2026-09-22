@@ -67,6 +67,12 @@ export class StudyDataService {
     }
   }
 
+  removeSavedDocument(id: string): void {
+    const data = this.read();
+    data.savedDocuments = data.savedDocuments.filter(document => document.id !== id);
+    this.write(data);
+  }
+
   getSavedDocuments(materia?: string): SavedDocument[] {
     const documents = this.read().savedDocuments;
     return materia ? documents.filter(document => document.materia === materia) : documents;
