@@ -1,4 +1,9 @@
 import { Component, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
+import { SearchService } from '../../../services/search.service';
+import { StudyDataService, SavedDocument } from '../../../services/study-data.service';
 
 interface Documento {
   id: number;
@@ -17,7 +22,7 @@ interface Materia {
 @Component({
   selector: 'app-materias',
   standalone: true,
-  imports: [],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './materias.html',
   styleUrl: './materias.css',
 })
@@ -72,6 +77,13 @@ export class MateriasComponent {
   ]);
 
   materiaSeleccionada = signal<Materia | null>(null);
+  searchTerm = '';
+  searchResults: any[] = [];
+  previewDocument: any = null;
+  searching = false;
+  searchError = '';
+
+  constructor(private searchService: SearchService, private studyData: StudyDataService) {}
 
   seleccionarMateria(materia: Materia) {
     this.materiaSeleccionada.set(materia);
@@ -79,6 +91,50 @@ export class MateriasComponent {
 
   volver() {
     this.materiaSeleccionada.set(null);
+    this.previewDocument = null;
+    this.searchResults = [];
+  }
+
+  buscarDocumentos(): void {
+    if (!this.searchTerm.trim()) return;
+    this.studyData.recordSearch();
+    this.searching = true;
+    this.searchError = '';
+    this.searchService.searchDocuments(this.searchTerm.trim()).subscribe({
+      next: (response: any) => {
+        this.searchResults = Array.isArray(response) ? response : response?.results || response?.items || [];
+        this.searching = false;
+        if (!this.searchResults.length) this.searchError = 'No encontramos documentos.';
+      },
+      error: () => {
+        this.searching = false;
+        this.searchError = 'No se pudo realizar la búsqueda.';
+      }
+    });
+  }
+
+  previsualizar(document: any): void {
+    this.previewDocument = document;
+  }
+
+  guardarEnMateria(document: any): void {
+    const materia = this.materiaSeleccionada();
+    if (!materia) return;
+    const saved: SavedDocument = {
+      id: document.id || document.url || document.title,
+      title: document.title || 'Sin título',
+      url: document.url || '#',
+      authors: document.authors,
+      year: document.year,
+      materia: materia.nombre,
+      savedAt: new Date().toISOString()
+    };
+    this.studyData.saveDocument(saved);
+    this.previewDocument = null;
+  }
+
+  documentosGuardados(materia: Materia): SavedDocument[] {
+    return this.studyData.getSavedDocuments(materia.nombre);
   }
 
   iconoPorTipo(tipo: string): string {

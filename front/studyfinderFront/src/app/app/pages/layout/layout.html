@@ -3,13 +3,13 @@
   <div class="ambient ambient-two"></div>
 
   <aside class="sidebar">
-    <div class="brand">
+    <a class="brand" routerLink="/" aria-label="Ir a la landing de StudyFinder">
       <div class="brand-mark">S</div>
       <div>
         <strong>StudyFinder</strong>
         <span>Smart Learning</span>
       </div>
-    </div>
+    </a>
 
     <div class="sidebar-label">Workspace</div>
 
@@ -38,9 +38,9 @@
         <span>Tareas</span>
       </a>
 
-      <a routerLink="/ia" routerLinkActive="active">
-        <span class="nav-icon">✦</span>
-        <span>Study AI</span>
+      <a routerLink="/subir" routerLinkActive="active">
+        <span class="nav-icon">↑</span>
+        <span>Subir archivos</span>
       </a>
 
       <a routerLink="/estadisticas" routerLinkActive="active">
@@ -59,8 +59,8 @@
         <div class="avatar">A</div>
 
         <div>
-          <strong>Estudiante</strong>
-          <span>Cuenta personal</span>
+          <strong>{{ user?.name || 'Estudiante' }}</strong>
+          <span>{{ user?.email || 'Cuenta personal' }}</span>
         </div>
 
         <span class="profile-dot"></span>
@@ -183,11 +183,11 @@
 
       <div class="topbar-actions">
 
-        <a class="auth-link" routerLink="/login" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        <a class="auth-link" routerLink="/login" *ngIf="!user">
           Entrar
         </a>
 
-        <a class="auth-link primary" routerLink="/signup" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        <a class="auth-link primary" routerLink="/signup" *ngIf="!user">
           Crear cuenta
         </a>
 
@@ -198,14 +198,14 @@
           ♢
         </button>
 
-        <button class="user-button">
+        <button class="user-button" *ngIf="user" (click)="logout()" title="Cerrar sesión">
 
           <span class="avatar small">
-            A
+            {{ user?.name?.charAt(0)?.toUpperCase() || 'A' }}
           </span>
 
           <span>
-            Mi perfil
+            {{ user?.name || 'Mi perfil' }}
           </span>
 
           <span class="chevron">

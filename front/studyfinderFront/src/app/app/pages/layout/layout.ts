@@ -1,8 +1,10 @@
 import { Component, OnInit, OnDestroy, HostListener, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { SearchService } from '../../../services/search.service';
+import { AuthService, AuthUser } from '../../../services/auth.service';
+import { StudyDataService } from '../../../services/study-data.service';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, switchMap, takeUntil } from 'rxjs/operators';
 
@@ -24,19 +26,28 @@ export class LayoutComponent implements OnInit, OnDestroy {
   searching: boolean = false;
   showResults: boolean = false;
   error: string | null = null;
+  user: AuthUser | null = null;
 
   private searchSubject = new Subject<string>();
   private destroy$ = new Subject<void>();
 
-  constructor(public searchService: SearchService, private elementRef: ElementRef) {}
+  constructor(
+    public searchService: SearchService,
+    private elementRef: ElementRef,
+    private authService: AuthService,
+    private studyData: StudyDataService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
+    this.user = this.authService.getUser();
     // Configurar búsqueda en tiempo real con debounce
     this.searchSubject.pipe(
       debounceTime(300),
       distinctUntilChanged(),
       filter(term => term.trim().length > 0),
       switchMap(term => {
+        this.studyData.recordSearch();
         this.searching = true;
         this.showResults = true;
         this.error = null;
@@ -105,5 +116,23 @@ export class LayoutComponent implements OnInit, OnDestroy {
     }
 
     this.searchSubject.next(term);
+  }
+
+  saveResult(result: any, event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.studyData.saveDocument({
+      id: result.id || result.url || result.title,
+      title: result.title || 'Sin título',
+      url: result.url || '#',
+      authors: result.authors,
+      year: result.year,
+      savedAt: new Date().toISOString()
+    });
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/']);
   }
 }

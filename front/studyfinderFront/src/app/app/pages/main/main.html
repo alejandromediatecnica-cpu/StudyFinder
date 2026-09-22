@@ -2,28 +2,28 @@
   <section class="welcome-row">
     <div>
       <div class="eyebrow">TU ESPACIO DE APRENDIZAJE</div>
-      <h1>Bienvenido <span>👋</span></h1>
+      <h1>Bienvenido {{ user?.name || '' }} <span>👋</span></h1>
       <p>Todo lo que necesitas para estudiar, organizado en un solo lugar.</p>
     </div>
-    <button class="primary-button"><span>＋</span> Nueva sesión</button>
+    <a class="primary-button" routerLink="/">Ir a la landing <span>↗</span></a>
   </section>
 
   <section class="stats-grid">
     <article class="stat-card">
       <div class="stat-icon blue">◷</div>
-      <div><span class="stat-label">Horas estudiadas</span><strong>24 <small>h</small></strong><em>+12% esta semana</em></div>
+      <div><span class="stat-label">Búsquedas realizadas</span><strong>{{ stats.searches }}</strong><em>Actividad de tu cuenta</em></div>
     </article>
     <article class="stat-card">
       <div class="stat-icon cyan">✦</div>
-      <div><span class="stat-label">Racha actual</span><strong>14 <small>días</small></strong><em>Tu mejor: 21 días</em></div>
+      <div><span class="stat-label">Sesiones abiertas</span><strong>{{ stats.studySessions }}</strong><em>Desde este dispositivo</em></div>
     </article>
     <article class="stat-card">
       <div class="stat-icon violet">▦</div>
-      <div><span class="stat-label">Materias activas</span><strong>6</strong><em>8 documentos nuevos</em></div>
+      <div><span class="stat-label">Documentos guardados</span><strong>{{ stats.savedDocuments.length }}</strong><em>En tu biblioteca</em></div>
     </article>
     <article class="stat-card">
       <div class="stat-icon green">↗</div>
-      <div><span class="stat-label">Progreso semanal</span><strong>82<small>%</small></strong><em>+7% frente a la semana anterior</em></div>
+      <div><span class="stat-label">Archivos subidos</span><strong>{{ stats.uploadedFiles.length }}</strong><em>Material propio</em></div>
     </article>
   </section>
 

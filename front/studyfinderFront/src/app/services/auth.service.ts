@@ -35,6 +35,25 @@ export class AuthService {
     );
   }
 
+  isLoggedIn(): boolean {
+    return !!this.getToken();
+  }
+
+  getToken(): string | null {
+    return typeof localStorage === 'undefined' ? null : localStorage.getItem('studyfinder_token');
+  }
+
+  getUser(): AuthUser | null {
+    if (typeof localStorage === 'undefined') return null;
+    const storedUser = localStorage.getItem('studyfinder_user');
+    return storedUser ? JSON.parse(storedUser) as AuthUser : null;
+  }
+
+  logout(): void {
+    localStorage.removeItem('studyfinder_token');
+    localStorage.removeItem('studyfinder_user');
+  }
+
   private storeSession(response: AuthResponse): void {
     localStorage.setItem('studyfinder_token', response.token);
     localStorage.setItem('studyfinder_user', JSON.stringify(response.user));

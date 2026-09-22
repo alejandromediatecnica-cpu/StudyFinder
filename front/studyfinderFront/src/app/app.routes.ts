@@ -1,4 +1,5 @@
-import { Routes } from '@angular/router';
+import { inject } from '@angular/core';
+import { CanActivateFn, Routes, Router } from '@angular/router';
 import { LayoutComponent } from './app/pages/layout/layout';
 import { MainComponent } from './app/pages/main/main';
 import { MateriasComponent } from './app/pages/materias/materias';
@@ -10,6 +11,14 @@ import { ConfiguracionComponent } from './app/pages/configuracion/configuracion'
 import { LoginComponent } from './app/pages/login/login';
 import { SignupComponent } from './app/pages/signup/signup';
 import { LandingComponent } from './app/pages/landing/landing';
+import { UploadComponent } from './app/pages/upload/upload';
+import { AuthService } from './services/auth.service';
+
+const authGuard: CanActivateFn = () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  return auth.isLoggedIn() ? true : router.createUrlTree(['/login']);
+};
 
 export const routes: Routes = [
   { path: '', component: LandingComponent, pathMatch: 'full' },
@@ -18,12 +27,13 @@ export const routes: Routes = [
   {
     path: '',
     component: LayoutComponent,
+    canActivate: [authGuard],
     children: [
       { path: 'main', component: MainComponent },
       { path: 'materias', component: MateriasComponent },
       { path: 'calendario', component: CalendarioComponent },
       { path: 'tareas', component: TareasComponent },
-      { path: 'ia', component: IaComponent },
+      { path: 'subir', component: UploadComponent },
       { path: 'estadisticas', component: EstadisticasComponent },
       { path: 'configuracion', component: ConfiguracionComponent },
       { path: 'landing', component: LandingComponent },

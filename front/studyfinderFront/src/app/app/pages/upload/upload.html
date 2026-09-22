@@ -1,0 +1,17 @@
+<section class="page-shell upload-page">
+  <header class="page-header">
+    <div>
+      <div class="eyebrow">BIBLIOTECA</div>
+      <h1>Subir archivos</h1>
+      <p>Agrega material de estudio a tu espacio personal.</p>
+    </div>
+  </header>
+
+  <label class="upload-zone">
+    <span class="upload-icon">↑</span>
+    <strong>{{ selectedFile || 'Selecciona un archivo' }}</strong>
+    <small>PDF, DOCX, PPTX o XLSX</small>
+    <input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx" (change)="onFileSelected($event)">
+  </label>
+  <p class="form-message" *ngIf="message">{{ message }}</p>
+</section>

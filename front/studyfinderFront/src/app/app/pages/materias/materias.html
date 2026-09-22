@@ -7,8 +7,27 @@
         <h1>{{ materia.nombre }}</h1>
         <p>{{ materia.documentos.length }} documentos disponibles</p>
       </div>
-      <button class="primary-button">＋ Subir documento</button>
+      <a class="primary-button" routerLink="/subir">＋ Subir documento</a>
     </header>
+    <section class="materia-search">
+      <div class="search-inline">
+        <input [(ngModel)]="searchTerm" (keyup.enter)="buscarDocumentos()" placeholder="Buscar documentos para esta materia...">
+        <button class="primary-button" (click)="buscarDocumentos()" [disabled]="searching">{{ searching ? 'Buscando...' : 'Buscar' }}</button>
+      </div>
+      <p class="search-error" *ngIf="searchError">{{ searchError }}</p>
+      <div class="search-results-grid" *ngIf="searchResults.length">
+        @for (result of searchResults; track result.url || result.title) {
+          <button class="result-card" (click)="previsualizar(result)">
+            <strong>{{ result.title || 'Sin título' }}</strong>
+            <span>{{ result.authors?.join(', ') || 'Documento de estudio' }}</span>
+          </button>
+        }
+      </div>
+    </section>
+    <section class="preview-panel" *ngIf="previewDocument">
+      <div><span class="eyebrow">VISTA PREVIA</span><h2>{{ previewDocument.title || 'Sin título' }}</h2><p>{{ previewDocument.authors?.join(', ') || 'Documento de estudio' }}</p><p *ngIf="previewDocument.year">Publicado en {{ previewDocument.year }}</p></div>
+      <div class="preview-actions"><button class="primary-button" (click)="guardarEnMateria(previewDocument)">Guardar en {{ materia.nombre }}</button><a class="open-button" [href]="previewDocument.url" target="_blank" rel="noopener noreferrer">Abrir fuente</a></div>
+    </section>
     <section class="documents-list">
       @for (doc of materia.documentos; track doc.id) {
         <div class="document-row">
@@ -16,6 +35,11 @@
           <div class="doc-info"><strong>{{ doc.nombre }}</strong><span>{{ doc.fecha }} · {{ doc.tamano }}</span></div>
           <span class="doc-type">{{ doc.tipo.toUpperCase() }}</span>
           <button class="open-button">Abrir →</button>
+        </div>
+      }
+      @for (doc of documentosGuardados(materia); track doc.id) {
+        <div class="document-row saved-document">
+          <span class="doc-icon">🔖</span><div class="doc-info"><strong>{{ doc.title }}</strong><span>Guardado en esta materia</span></div><span class="doc-type">WEB</span><a class="open-button" [href]="doc.url" target="_blank" rel="noopener noreferrer">Abrir →</a>
         </div>
       }
     </section>

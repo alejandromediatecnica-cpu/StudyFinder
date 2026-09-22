@@ -1,5 +1,6 @@
 import hashlib
 import secrets
+import sqlite3
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException, status
@@ -53,7 +54,10 @@ def signup(payload: SignupRequest):
         "password_hash": password_hash,
         "password_salt": salt,
     }
-    result = users_collection.insert_one(user)
+    try:
+        result = users_collection.insert_one(user)
+    except sqlite3.IntegrityError:
+        raise HTTPException(status_code=409, detail="El correo ya esta registrado")
     user["_id"] = result.inserted_id
     return user_response(user, secrets.token_urlsafe(32))
 
