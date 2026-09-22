@@ -13,6 +13,8 @@ import { LandingComponent } from './app/pages/landing/landing';
 
 export const routes: Routes = [
   { path: '', component: LandingComponent, pathMatch: 'full' },
+  { path: 'login', component: LoginComponent },
+  { path: 'signup', component: SignupComponent },
   {
     path: '',
     component: LayoutComponent,
@@ -24,8 +26,6 @@ export const routes: Routes = [
       { path: 'ia', component: IaComponent },
       { path: 'estadisticas', component: EstadisticasComponent },
       { path: 'configuracion', component: ConfiguracionComponent },
-      { path: 'login', component: LoginComponent },
-      { path: 'signup', component: SignupComponent },
       { path: 'landing', component: LandingComponent },
     ]
   },

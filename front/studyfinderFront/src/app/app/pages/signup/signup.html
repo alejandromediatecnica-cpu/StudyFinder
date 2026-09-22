@@ -15,10 +15,11 @@
       <label for="signup-password">Contraseña</label>
       <input id="signup-password" name="password" type="password" [(ngModel)]="password" placeholder="Crea una contraseña" minlength="6" required>
 
-      <button class="submit-button" type="submit" [disabled]="signupForm.invalid">Crear mi cuenta</button>
+      <button class="submit-button" type="submit" [disabled]="signupForm.invalid || loading">{{ loading ? 'Creando...' : 'Crear mi cuenta' }}</button>
     </form>
 
     <p class="auth-switch">¿Ya tienes cuenta? <a routerLink="/login">Entra aquí</a></p>
-    <p class="form-message" *ngIf="submitted">Tu espacio de estudio está casi listo.</p>
+    <p class="form-message" *ngIf="submitted && !error">Tu espacio de estudio está casi listo.</p>
+    <p class="form-error" *ngIf="error">{{ error }}</p>
   </section>
 </div>
