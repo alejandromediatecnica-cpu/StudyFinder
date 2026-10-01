@@ -46,12 +46,25 @@ export class AuthService {
   getUser(): AuthUser | null {
     if (typeof localStorage === 'undefined') return null;
     const storedUser = localStorage.getItem('studyfinder_user');
-    return storedUser ? JSON.parse(storedUser) as AuthUser : null;
+    if (!storedUser) return null;
+    // Un valor corrupto en localStorage no debe tumbar la app: Landing y Layout
+    // llaman a getUser() en sus constructores.
+    try {
+      return JSON.parse(storedUser) as AuthUser;
+    } catch {
+      return null;
+    }
   }
 
   logout(): void {
+    const token = this.getToken();
     localStorage.removeItem('studyfinder_token');
     localStorage.removeItem('studyfinder_user');
+    if (token) {
+      this.http.post<void>(`${this.apiUrl}/logout`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      }).subscribe({ error: () => undefined });
+    }
   }
 
   private storeSession(response: AuthResponse): void {

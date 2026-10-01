@@ -1,4 +1,14 @@
-:root {
+/* ==================================================================
+   Tokens
+   ------------------------------------------------------------------
+   Todo el color de la app sale de estas variables. Cada tema redefine
+   los valores, asi que las hojas de pagina no llevan colores sueltos.
+   ================================================================== */
+
+:root,
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
   --primary: #4f8cff;
   --primary-strong: #2f6ff5;
   --secondary: #62d6ff;
@@ -16,6 +26,155 @@
   --shadow: 0 22px 60px rgba(0, 0, 0, .32);
   --radius-lg: 24px;
   --radius-md: 18px;
+
+  /* --- capas de superficie --- */
+  --app-bg: #050814;
+  --panel: linear-gradient(145deg, rgba(17, 28, 55, .76), rgba(7, 14, 31, .68));
+  --panel-solid: #0b1225;
+  --panel-raised: rgba(255, 255, 255, .035);
+  --panel-inset: rgba(255, 255, 255, .018);
+  --panel-hover: rgba(79, 140, 255, .08);
+  --panel-overlay: rgba(9, 17, 36, .98);
+  --panel-field: rgba(255, 255, 255, .04);
+  --panel-field-focus: rgba(79, 140, 255, .10);
+  --panel-dark: #07102a;
+  --panel-sunken: #050c1c;
+  /* Superficie translucida: sidebar, tarjetas y paneles con blur detras. */
+  --panel-veil: rgba(15, 22, 41, .82);
+  --panel-veil-strong: rgba(13, 19, 36, .96);
+  /* Tarjetas de escaparate del hero: llevan texto blanco encima, asi que se
+     mantienen oscuras en los dos temas para no perder el contraste. */
+  --showcase: linear-gradient(145deg, rgba(20, 44, 86, .92), rgba(8, 17, 40, .92));
+
+  /* --- texto --- */
+  --text-strong: #f5f8ff;
+  --text-body: #dbe6f9;
+  --text-muted: #9ca9c2;
+  --text-faint: #74829b;
+  --text-ghost: #5d7192;
+  --text-on-accent: #ffffff;
+
+  /* --- bordes --- */
+  --line: rgba(255, 255, 255, .10);
+  --line-soft: rgba(255, 255, 255, .06);
+  --line-strong: rgba(255, 255, 255, .16);
+  --line-accent: rgba(120, 207, 255, .30);
+
+  /* --- acentos --- */
+  --accent: #4f8cff;
+  --accent-bright: #69cfff;
+  --accent-cyan: #62d6ff;
+  --accent-violet: #9b74ff;
+  --accent-green: #45d39a;
+  --accent-red: #ff6b81;
+  --accent-amber: #ffca68;
+  --accent-deep: #24355a;
+  --accent-grad: linear-gradient(135deg, #5caeff, #376cf5);
+  --accent-glow: rgba(57, 112, 255, .28);
+
+  /* --- velos de color (fondos sutiles) --- */
+  --veil-025: rgba(255, 255, 255, .025);
+  --veil-035: rgba(255, 255, 255, .035);
+  --veil-045: rgba(255, 255, 255, .045);
+  --veil-06: rgba(255, 255, 255, .06);
+  --veil-08: rgba(255, 255, 255, .08);
+  --veil-12: rgba(255, 255, 255, .12);
+  --veil-blue: rgba(92, 174, 255, .14);
+  --veil-blue-soft: rgba(92, 174, 255, .10);
+  --veil-cyan: rgba(105, 207, 255, .18);
+  --veil-violet: rgba(139, 93, 255, .13);
+  --veil-green: rgba(69, 211, 154, .14);
+  --veil-red: rgba(255, 154, 170, .10);
+  --veil-amber: rgba(255, 202, 104, .14);
+
+  /* --- sombras --- */
+  --shadow-soft: 0 10px 30px rgba(0, 0, 0, .28);
+  --shadow-deep: 0 26px 60px rgba(0, 0, 0, .5);
+  --shade: rgba(0, 0, 0, .32);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --primary: #2f6ff5;
+  --primary-strong: #1c4fd0;
+  --secondary: #0e9fd0;
+  --background: #eef2fa;
+  --surface: rgba(255, 255, 255, .88);
+  --surface-strong: rgba(255, 255, 255, .98);
+  --surface-soft: rgba(20, 38, 78, .05);
+  --border: rgba(20, 38, 78, .12);
+  --text: #16213c;
+  --muted: #5c6b8a;
+  --success: #17996a;
+  --warning: #b8801a;
+  --danger: #d93a52;
+  --card: rgba(255, 255, 255, .92);
+  --shadow: 0 22px 60px rgba(31, 54, 102, .13);
+  --radius-lg: 24px;
+  --radius-md: 18px;
+
+  /* --- capas de superficie --- */
+  --app-bg: #eef2fa;
+  --panel: linear-gradient(145deg, rgba(255, 255, 255, .96), rgba(246, 249, 255, .92));
+  --panel-solid: #ffffff;
+  --panel-raised: rgba(20, 38, 78, .035);
+  --panel-inset: rgba(20, 38, 78, .02);
+  --panel-hover: rgba(47, 111, 245, .07);
+  --panel-overlay: rgba(255, 255, 255, .98);
+  --panel-field: rgba(20, 38, 78, .04);
+  --panel-field-focus: rgba(47, 111, 245, .09);
+  --panel-dark: #dce6f7;
+  --panel-sunken: #e3eafa;
+  --panel-veil: rgba(255, 255, 255, .82);
+  --panel-veil-strong: rgba(255, 255, 255, .96);
+  --showcase: linear-gradient(145deg, #1b3a6b, #14264a);
+
+  /* --- texto --- */
+  --text-strong: #10192f;
+  --text-body: #23304d;
+  --text-muted: #5c6b8a;
+  --text-faint: #7b8aa6;
+  --text-ghost: #9aa8c0;
+  --text-on-accent: #ffffff;
+
+  /* --- bordes --- */
+  --line: rgba(20, 38, 78, .12);
+  --line-soft: rgba(20, 38, 78, .07);
+  --line-strong: rgba(20, 38, 78, .2);
+  --line-accent: rgba(47, 111, 245, .3);
+
+  /* --- acentos --- */
+  --accent: #2f6ff5;
+  --accent-bright: #1c6fd6;
+  --accent-cyan: #0e9fd0;
+  --accent-violet: #6d3ae0;
+  --accent-green: #17996a;
+  --accent-red: #d93a52;
+  --accent-amber: #b8801a;
+  --accent-deep: #1e2c4a;
+  --accent-grad: linear-gradient(135deg, #5b93ff, #2f6ff5);
+  --accent-glow: rgba(47, 111, 245, .22);
+
+  /* --- velos de color --- */
+  --veil-025: rgba(20, 38, 78, .025);
+  --veil-035: rgba(20, 38, 78, .035);
+  --veil-045: rgba(20, 38, 78, .045);
+  --veil-06: rgba(20, 38, 78, .06);
+  --veil-08: rgba(20, 38, 78, .08);
+  --veil-12: rgba(20, 38, 78, .12);
+  --veil-blue: rgba(47, 111, 245, .11);
+  --veil-blue-soft: rgba(47, 111, 245, .07);
+  --veil-cyan: rgba(14, 159, 208, .13);
+  --veil-violet: rgba(109, 58, 224, .10);
+  --veil-green: rgba(23, 153, 106, .12);
+  --veil-red: rgba(217, 58, 82, .09);
+  --veil-amber: rgba(184, 128, 26, .12);
+
+  /* --- sombras --- */
+  --shadow-soft: 0 10px 30px rgba(31, 54, 102, .1);
+  --shadow-deep: 0 26px 60px rgba(31, 54, 102, .18);
+  --shade: rgba(31, 54, 102, .12);
 }
 
 html, body {

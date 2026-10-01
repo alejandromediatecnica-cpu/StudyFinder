@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, HostListener, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, ViewChild, ElementRef, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
@@ -6,7 +6,7 @@ import { SearchService } from '../../../services/search.service';
 import { AuthService, AuthUser } from '../../../services/auth.service';
 import { StudyDataService } from '../../../services/study-data.service';
 import { Subject, of } from 'rxjs';
-import { catchError, debounceTime, distinctUntilChanged, switchMap, takeUntil } from 'rxjs/operators';
+import { catchError, debounceTime, switchMap, takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-layout',
@@ -18,14 +18,12 @@ import { catchError, debounceTime, distinctUntilChanged, switchMap, takeUntil } 
 export class LayoutComponent implements OnInit, OnDestroy {
   @ViewChild('searchContainer') searchContainer!: ElementRef;
 
-  searchTerm: string = '';
   searchQuery: string = '';
-  results: any[] = [];
-  searchResults: any[] = [];
-  isLoading: boolean = false;
-  searching: boolean = false;
-  showResults: boolean = false;
-  error: string | null = null;
+  // Estados asincronos: deben ser signals porque la app corre sin zone.js.
+  searching = signal(false);
+  showResults = signal(false);
+  error = signal<string | null>(null);
+  searchResults = signal<any[]>([]);
   user: AuthUser | null = null;
   profileMenuOpen = false;
 
@@ -41,26 +39,24 @@ export class LayoutComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.user = this.authService.getUser();
-    // Configurar búsqueda en tiempo real con debounce
     this.searchSubject.pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
+      debounceTime(250),
       switchMap(term => {
         if (!term.trim()) {
-          this.searching = false;
-          this.showResults = false;
-          this.searchResults = [];
-          this.error = null;
+          this.searching.set(false);
+          this.showResults.set(false);
+          this.searchResults.set([]);
+          this.error.set(null);
           return of([]);
         }
         this.studyData.recordSearch();
-        this.searching = true;
-        this.showResults = true;
-        this.error = null;
+        this.searching.set(true);
+        this.showResults.set(true);
+        this.error.set(null);
         return this.searchService.searchDocuments(term).pipe(
           catchError(() => {
-            this.searching = false;
-            this.error = 'No se pudo realizar la búsqueda.';
+            this.searching.set(false);
+            this.error.set('No se pudo realizar la búsqueda.');
             return of(null);
           })
         );
@@ -69,17 +65,15 @@ export class LayoutComponent implements OnInit, OnDestroy {
     ).subscribe({
       next: (response: any) => {
         if (response === null) return;
-        this.results = Array.isArray(response) ? response : response?.results || response?.items || [];
-        this.searchResults = this.results;
-        this.searching = false;
-        this.error = this.searchResults.length === 0 ? 'No encontramos resultados.' : null;
-        console.log('Artículos vinculados:', this.searchResults);
+        const list = Array.isArray(response) ? response : response?.results || response?.items || [];
+        this.searchResults.set(list);
+        this.searching.set(false);
+        this.error.set(list.length === 0 ? 'No encontramos resultados.' : null);
       },
-      error: (error: any) => {
-        console.error('Fallo en búsqueda:', error);
-        this.searching = false;
-        this.error = 'No se pudo realizar la búsqueda.';
-        this.searchResults = [];
+      error: (err: any) => {
+        this.searching.set(false);
+        this.error.set('No se pudo realizar la búsqueda.');
+        this.searchResults.set([]);
       }
     });
   }
@@ -91,62 +85,29 @@ export class LayoutComponent implements OnInit, OnDestroy {
 
   onSearchInput(term: string): void {
     this.searchQuery = term;
-    
+
     if (!term.trim()) {
-      this.searching = false;
-      this.showResults = false;
-      this.searchResults = [];
-      this.error = null;
+      this.searching.set(false);
+      this.showResults.set(false);
+      this.searchResults.set([]);
+      this.error.set(null);
       return;
     }
 
-    this.searching = true;
-    this.showResults = true;
-    this.error = null;
     this.searchSubject.next(term);
-  }
-
-  onSearchKeydown(event: KeyboardEvent): void {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-    }
+    this.searching.set(true);
+    this.showResults.set(true);
   }
 
   // Cerrar resultados cuando se hace click fuera
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
-    
+
     if (!this.searchContainer?.nativeElement.contains(target)) {
-      this.showResults = false;
+      this.showResults.set(false);
       this.profileMenuOpen = false;
     }
-  }
-
-  search(): void {
-    const term = (this.searchQuery || this.searchTerm || '').trim();
-
-    if (!term) {
-      this.showResults = false;
-      this.searchResults = [];
-      this.error = null;
-      return;
-    }
-
-    this.searchSubject.next(term);
-  }
-
-  saveResult(result: any, event: MouseEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-    this.studyData.saveDocument({
-      id: result.id || result.url || result.title,
-      title: result.title || 'Sin título',
-      url: result.url || '#',
-      authors: result.authors,
-      year: result.year,
-      savedAt: new Date().toISOString()
-    });
   }
 
   logout(): void {

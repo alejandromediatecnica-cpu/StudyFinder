@@ -1,73 +1,146 @@
-import os
-import sqlite3
+from datetime import datetime, timezone
 from pathlib import Path
-from pymongo import MongoClient
-from dotenv import load_dotenv
+from uuid import uuid4
 
-load_dotenv()
+from pymongo import ASCENDING, MongoClient
+from pymongo.errors import DuplicateKeyError
 
-MONGODB_URL = os.getenv("MONGODB_URL", "mongodb://localhost:27017")
-MONGODB_DATABASE = os.getenv("MONGODB_DATABASE", "studyfinder_log")
+from app.config import MONGODB_DATABASE, MONGODB_URL
 
-client = MongoClient(
-    MONGODB_URL,
-    serverSelectionTimeoutMS=5000,
-    connectTimeoutMS=5000,
-)
+UPLOADS_PATH = Path(__file__).resolve().parent.parent / "uploads"
 
-db = client[MONGODB_DATABASE]
+_client: MongoClient | None = None
+
+
+def get_client() -> MongoClient:
+    global _client
+    if _client is None:
+        _client = MongoClient(MONGODB_URL)
+    return _client
+
+
+def get_database():
+    return get_client()[MONGODB_DATABASE]
+
+
+db = get_database()
 
 users_collection = db["users"]
+sessions_collection = db["auth_sessions"]
+documents_collection = db["documents"]
+materia_documents_collection = db["materia_documents"]
 
 
-def mongo_available() -> bool:
-    try:
-        client.admin.command("ping")
-        return True
-    except Exception:
+def initialize_database() -> None:
+    UPLOADS_PATH.mkdir(parents=True, exist_ok=True)
+    users_collection.create_index("email", unique=True)
+    materia_documents_collection.create_index(
+        [("user_id", ASCENDING), ("materia", ASCENDING), ("document_id", ASCENDING)],
+        unique=True,
+    )
+
+
+initialize_database()
+
+
+def create_session(user_id: str) -> str:
+    token = uuid4().hex + uuid4().hex
+    sessions_collection.insert_one(
+        {
+            "token": token,
+            "user_id": user_id,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        }
+    )
+    return token
+
+
+def user_id_for_token(token: str) -> str | None:
+    session = sessions_collection.find_one({"token": token})
+    return session["user_id"] if session else None
+
+
+def revoke_session(token: str) -> None:
+    sessions_collection.delete_one({"token": token})
+
+
+def create_document(user_id: str, filename: str, storage_path: str, content_type: str, size: int) -> dict:
+    document = {
+        "id": uuid4().hex,
+        "user_id": user_id,
+        "filename": filename,
+        "storage_path": storage_path,
+        "content_type": content_type,
+        "size": size,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    documents_collection.insert_one(document)
+    return document
+
+
+def list_documents(user_id: str, materia: str | None = None) -> list[dict]:
+    if materia:
+        related_ids = [
+            relation["document_id"]
+            for relation in materia_documents_collection.find({"user_id": user_id, "materia": materia})
+        ]
+        # Las asociaciones pueden apuntar a documentos ajenos compartidos, así
+        # que el filtro por materia busca solo por id, no por propietario.
+        query = {"id": {"$in": related_ids}}
+    else:
+        query = {"user_id": user_id}
+    return list(documents_collection.find(query).sort("created_at", -1))
+
+
+def get_document(user_id: str, document_id: str) -> dict | None:
+    return documents_collection.find_one({"id": document_id, "user_id": user_id})
+
+
+def get_document_by_id(document_id: str) -> dict | None:
+    return documents_collection.find_one({"id": document_id})
+
+
+def total_storage_for_user(user_id: str) -> int:
+    total = 0
+    for document in documents_collection.find({"user_id": user_id}, {"size": 1}):
+        total += document.get("size", 0)
+    return total
+
+
+def list_documents_from_others(exclude_user_id: str) -> list[dict]:
+    documents = list(
+        documents_collection.find({"user_id": {"$ne": exclude_user_id}}).sort("created_at", -1)
+    )
+    owners = {str(user["_id"]): user for user in users_collection.find()}
+    for document in documents:
+        owner = owners.get(document["user_id"])
+        document["owner_name"] = owner["name"] if owner else None
+        document["owner_email"] = owner["email"] if owner else None
+    return documents
+
+
+def associate_document(user_id: str, materia: str, document_id: str) -> bool:
+    if not documents_collection.find_one({"id": document_id}):
         return False
+    # Upsert con $setOnInsert: asociar dos veces es idempotente (índice único).
+    materia_documents_collection.update_one(
+        {"user_id": user_id, "materia": materia, "document_id": document_id},
+        {"$setOnInsert": {"created_at": datetime.now(timezone.utc).isoformat()}},
+        upsert=True,
+    )
+    return True
 
 
-class LocalUsersCollection:
-    def __init__(self) -> None:
-        self.connection = sqlite3.connect(
-            Path(__file__).resolve().parent.parent / "studyfinder.db",
-            check_same_thread=False,
-        )
-        self.connection.row_factory = sqlite3.Row
-        self.connection.execute(
-            """CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL,
-                email TEXT NOT NULL UNIQUE,
-                password_hash TEXT NOT NULL,
-                password_salt TEXT NOT NULL
-            )"""
-        )
-        self.connection.commit()
-
-    def find_one(self, query: dict):
-        row = self.connection.execute(
-            "SELECT * FROM users WHERE email = ? LIMIT 1", (query["email"],)
-        ).fetchone()
-        if not row:
-            return None
-        user = dict(row)
-        user["_id"] = user.pop("id")
-        return user
-
-    def insert_one(self, user: dict):
-        cursor = self.connection.execute(
-            "INSERT INTO users (name, email, password_hash, password_salt) VALUES (?, ?, ?, ?)",
-            (user["name"], user["email"], user["password_hash"], user["password_salt"]),
-        )
-        self.connection.commit()
-
-        class InsertResult:
-            inserted_id = cursor.lastrowid
-
-        return InsertResult()
+def remove_document_association(user_id: str, materia: str, document_id: str) -> None:
+    materia_documents_collection.delete_one(
+        {"user_id": user_id, "materia": materia, "document_id": document_id}
+    )
 
 
-if not mongo_available():
-    users_collection = LocalUsersCollection()
+def delete_document(user_id: str, document_id: str) -> dict | None:
+    document = documents_collection.find_one({"id": document_id, "user_id": user_id})
+    if not document:
+        return None
+    materia_documents_collection.delete_many({"document_id": document_id})
+    documents_collection.delete_one({"id": document_id, "user_id": user_id})
+    return document

@@ -1,0 +1,147 @@
+<section class="library-page">
+  <header class="page-header">
+    <div>
+      <div class="eyebrow">TU ESPACIO PERSONAL</div>
+      <h1>Biblioteca</h1>
+      <p>Tus documentos guardados, disponibles cada vez que vuelvas.</p>
+    </div>
+    <a class="primary-button" routerLink="/subir">＋ Subir documento</a>
+  </header>
+  <div
+    class="storage-bar"
+    *ngIf="!loading()"
+    role="progressbar"
+    [attr.aria-valuenow]="storagePercent()"
+  >
+    <div class="storage-bar-track">
+      <div class="storage-bar-fill" [style.width.%]="storagePercent()"></div>
+    </div>
+    <span class="storage-bar-label">
+      <strong>{{ formatSize(storageUsed()) }}</strong> usados · <strong>3 MB</strong> en total · te
+      quedan {{ formatSize(storageRemaining()) }}
+    </span>
+  </div>
+  <div class="library-toolbar" *ngIf="documentos().length || publicos().length">
+    <label class="library-search">
+      <span aria-hidden="true">⌕</span>
+      <input
+        [(ngModel)]="filter"
+        placeholder="Filtrar por nombre..."
+        aria-label="Filtrar documentos"
+      />
+    </label>
+    <span class="document-count"
+      >{{ filteredDocuments().length }} propios · {{ filteredPublic().length }} de otros</span
+    >
+  </div>
+  <p class="status-message" *ngIf="loading()">Cargando biblioteca…</p>
+  <div class="error-message" *ngIf="error()" role="alert">
+    {{ error() }} <button type="button" (click)="refresh()">Reintentar</button>
+  </div>
+  <div
+    class="empty-state"
+    *ngIf="!loading() && !error() && !documentos().length && !publicos().length"
+  >
+    <div class="empty-icon">▤</div>
+    <h2>Tu biblioteca está vacía</h2>
+    <p>
+      Sube apuntes, libros o presentaciones. Se guardarán en el servidor y podrás añadirlos a tus
+      materias.
+    </p>
+    <a class="primary-button" routerLink="/subir">Subir mi primer documento</a>
+  </div>
+  <div
+    class="empty-state compact"
+    *ngIf="
+      !loading() && documentos().length && !filteredDocuments().length && !filteredPublic().length
+    "
+  >
+    <h2>No hay coincidencias</h2>
+    <p>Prueba con otro nombre de archivo.</p>
+  </div>
+  <div class="library-section">
+    <h2 class="section-title">Mis documentos</h2>
+    <div class="document-grid" *ngIf="!loading() && filteredDocuments().length">
+      <article class="document-card" *ngFor="let document of filteredDocuments()">
+        <div class="document-icon">
+          {{ document.filename.toLowerCase().endsWith('.pdf') ? 'PDF' : 'DOC' }}
+        </div>
+        <div class="document-details">
+          <h2 [title]="document.filename">{{ document.filename }}</h2>
+          <p>{{ formatSize(document.size) }} <span>·</span> {{ formatDate(document.createdAt) }}</p>
+          <label class="materia-picker">
+            <span *ngIf="asignadoA()[document.id]" class="assigned-tag"
+              >✔ {{ asignadoA()[document.id] }}</span
+            >
+            <select
+              [ngModel]="asignadoA()[document.id] || ''"
+              (ngModelChange)="asignar($event, document)"
+              [disabled]="assigningId() !== null"
+              aria-label="Asignar a una materia"
+            >
+              <option value="">Asignar a materia…</option>
+              <option *ngFor="let materia of materias()" [value]="materia">{{ materia }}</option>
+            </select>
+          </label>
+        </div>
+        <div class="card-actions">
+          <button type="button" class="download-button" (click)="download(document)">
+            Descargar
+          </button>
+          <button
+            type="button"
+            class="remove-button"
+            [disabled]="deletingId() === document.id"
+            (click)="remove(document)"
+          >
+            {{ deletingId() === document.id ? 'Eliminando…' : 'Eliminar' }}
+          </button>
+        </div>
+      </article>
+    </div>
+    <p class="section-empty" *ngIf="!loading() && !error() && !documentos().length">
+      Todavía no has subido documentos.
+    </p>
+  </div>
+  <div class="library-section">
+    <h2 class="section-title">Documentos de otros usuarios</h2>
+    <p class="status-message" *ngIf="loadingPublic()">Cargando documentos compartidos…</p>
+    <div class="error-message" *ngIf="errorPublic()" role="alert">{{ errorPublic() }}</div>
+    <div class="document-grid" *ngIf="!loadingPublic() && filteredPublic().length">
+      <article class="document-card shared" *ngFor="let document of filteredPublic()">
+        <div class="document-icon">
+          {{ document.filename.toLowerCase().endsWith('.pdf') ? 'PDF' : 'DOC' }}
+        </div>
+        <div class="document-details">
+          <h2 [title]="document.filename">{{ document.filename }}</h2>
+          <p>
+            {{ document.ownerName || document.ownerEmail || 'Otro usuario' }} <span>·</span>
+            {{ formatSize(document.size) }} <span>·</span> {{ formatDate(document.createdAt) }}
+          </p>
+          <label class="materia-picker">
+            <span *ngIf="asignadoA()[document.id]" class="assigned-tag"
+              >✔ {{ asignadoA()[document.id] }}</span
+            >
+            <select
+              [ngModel]="asignadoA()[document.id] || ''"
+              (ngModelChange)="asignar($event, document)"
+              [disabled]="assigningId() !== null"
+              aria-label="Asignar a una materia"
+            >
+              <option value="">Asignar a materia…</option>
+              <option *ngFor="let materia of materias()" [value]="materia">{{ materia }}</option>
+            </select>
+          </label>
+        </div>
+        <div class="card-actions">
+          <button type="button" class="download-button" (click)="download(document)">
+            Ver / Descargar
+          </button>
+        </div>
+      </article>
+    </div>
+    <p class="section-empty" *ngIf="!loadingPublic() && !publicos().length">
+      Aún no hay documentos compartidos por otros usuarios.
+    </p>
+  </div>
+</section>

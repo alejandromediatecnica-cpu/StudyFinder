@@ -5,13 +5,13 @@ import { MainComponent } from './app/pages/main/main';
 import { MateriasComponent } from './app/pages/materias/materias';
 import { CalendarioComponent } from './app/pages/calendario/calendario';
 import { TareasComponent } from './app/pages/tareas/tareas';
-import { IaComponent } from './app/pages/ia/ia';
 import { EstadisticasComponent } from './app/pages/estadisticas/estadisticas';
 import { ConfiguracionComponent } from './app/pages/configuracion/configuracion';
 import { LoginComponent } from './app/pages/login/login';
 import { SignupComponent } from './app/pages/signup/signup';
 import { LandingComponent } from './app/pages/landing/landing';
 import { UploadComponent } from './app/pages/upload/upload';
+import { LibraryComponent } from './app/pages/library/library';
 import { AuthService } from './services/auth.service';
 
 const authGuard: CanActivateFn = () => {
@@ -40,9 +40,9 @@ export const routes: Routes = [
       { path: 'calendario', component: CalendarioComponent },
       { path: 'tareas', component: TareasComponent },
       { path: 'subir', component: UploadComponent },
+      { path: 'biblioteca', component: LibraryComponent },
       { path: 'estadisticas', component: EstadisticasComponent },
       { path: 'configuracion', component: ConfiguracionComponent },
-      { path: 'landing', component: LandingComponent },
     ]
   },
   { path: '**', redirectTo: '' }

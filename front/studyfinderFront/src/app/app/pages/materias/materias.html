@@ -5,10 +5,33 @@
         <button class="back-button" (click)="volver()">← Volver a materias</button>
         <div class="eyebrow">MATERIA</div>
         <h1>{{ materia.nombre }}</h1>
-        <p>{{ materia.documentos.length }} documentos disponibles</p>
+        <p>{{ documentosDeMateria.length + documentosGuardados(materia).length }} documentos disponibles</p>
       </div>
-      <a class="primary-button" routerLink="/subir">＋ Subir documento</a>
+      <div class="materia-header-actions">
+        <button class="primary-button" type="button" (click)="abrirSelectorBiblioteca()">＋ Añadir desde Biblioteca</button>
+        <a class="secondary-button" routerLink="/subir">Subir documento</a>
+      </div>
     </header>
+    <div class="materia-modal-backdrop" *ngIf="selectorBibliotecaAbierto" (click)="selectorBibliotecaAbierto = false">
+      <section class="library-picker" (click)="$event.stopPropagation()">
+        <button class="picker-close" type="button" aria-label="Cerrar" (click)="selectorBibliotecaAbierto = false">×</button>
+        <div class="eyebrow">SELECCIONAR DOCUMENTO</div>
+        <h2>Desde tu Biblioteca</h2>
+        <p>Elige un archivo ya guardado para añadirlo a {{ materia.nombre }}.</p>
+        <div class="picker-status" *ngIf="cargandoBiblioteca">Cargando documentos…</div>
+        <div class="picker-status" *ngIf="!cargandoBiblioteca && !documentosBiblioteca.length">Aún no tienes documentos. <a routerLink="/subir">Sube uno a tu Biblioteca</a>.</div>
+        <div class="picker-list" *ngIf="!cargandoBiblioteca && documentosBiblioteca.length">
+          <div class="picker-row" *ngFor="let documento of documentosBiblioteca">
+            <span class="doc-icon">📄</span>
+            <div class="doc-info"><strong>{{ documento.filename }}</strong><span>{{ tamanoLegible(documento.size) }}</span></div>
+            <button type="button" class="primary-button" [disabled]="estaEnMateria(documento) || guardandoDocumentoId === documento.id" (click)="agregarDesdeBiblioteca(documento)">
+              {{ estaEnMateria(documento) ? 'Añadido' : guardandoDocumentoId === documento.id ? 'Añadiendo…' : 'Añadir' }}
+            </button>
+          </div>
+        </div>
+        <p class="search-error" *ngIf="errorBiblioteca" role="alert">{{ errorBiblioteca }}</p>
+      </section>
+    </div>
     <section class="materia-search">
       <div class="search-inline">
         <input [(ngModel)]="searchTerm" (keyup.enter)="buscarDocumentos()" placeholder="Buscar documentos para esta materia...">
@@ -26,15 +49,15 @@
     </section>
     <section class="preview-panel" *ngIf="previewDocument">
       <div><span class="eyebrow">VISTA PREVIA</span><h2>{{ previewDocument.title || 'Sin título' }}</h2><p>{{ previewDocument.authors?.join(', ') || 'Documento de estudio' }}</p><p *ngIf="previewDocument.year">Publicado en {{ previewDocument.year }}</p></div>
-      <div class="preview-actions"><button class="primary-button" (click)="guardarEnMateria(previewDocument)">Guardar en {{ materia.nombre }}</button><a class="open-button" [href]="previewDocument.url" target="_blank" rel="noopener noreferrer">Abrir fuente</a></div>
+      <div class="preview-actions"><button class="primary-button" (click)="guardarEnMateria(previewDocument)">Guardar en {{ materia.nombre }}</button>@if (previewDocument.url) {<a class="open-button" [href]="previewDocument.url" target="_blank" rel="noopener noreferrer">Abrir fuente</a>}</div>
     </section>
     <section class="documents-list">
-      @for (doc of materia.documentos; track doc.id) {
+      @for (doc of documentosDeMateria; track doc.id) {
         <div class="document-row">
-          <span class="doc-icon">{{ iconoPorTipo(doc.tipo) }}</span>
-          <div class="doc-info"><strong>{{ doc.nombre }}</strong><span>{{ doc.fecha }} · {{ doc.tamano }}</span></div>
-          <span class="doc-type">{{ doc.tipo.toUpperCase() }}</span>
-          <div class="document-actions"><button class="open-button">Abrir →</button><button class="delete-button" (click)="eliminarDocumento(doc, $event)" aria-label="Eliminar documento">Eliminar</button></div>
+          <span class="doc-icon">📄</span>
+          <div class="doc-info"><strong>{{ doc.filename }}</strong><span>Guardado en tu Biblioteca · {{ tamanoLegible(doc.size) }}</span></div>
+          <span class="doc-type">ARCHIVO</span>
+          <div class="document-actions"><button class="open-button" type="button" (click)="descargar(doc)">Descargar →</button><button class="delete-button" type="button" (click)="quitarDeMateria(doc)">Quitar</button></div>
         </div>
       }
       @for (doc of documentosGuardados(materia); track doc.id) {
@@ -63,7 +86,7 @@
       @for (materia of materias(); track materia.id) {
         <article class="materia-card" (click)="seleccionarMateria(materia)">
           <div class="materia-top"><span class="subject-icon">{{ materia.nombre.charAt(0) }}</span><span class="arrow">↗</span></div>
-          <h3>{{ materia.nombre }}</h3><p>{{ materia.descripcion || 'Tu espacio de estudio' }}</p><p>{{ materia.documentos.length }} documentos</p>
+          <h3>{{ materia.nombre }}</h3><p>{{ materia.descripcion || 'Tu espacio de estudio' }}</p><p>Organiza aquí tus documentos guardados.</p>
           <div class="card-footer"><span>Biblioteca</span><div><button (click)="$event.stopPropagation(); seleccionarMateria(materia)">Ver documentos</button><button class="delete-button" (click)="eliminarMateria(materia, $event)">Eliminar</button></div></div>
         </article>
       }

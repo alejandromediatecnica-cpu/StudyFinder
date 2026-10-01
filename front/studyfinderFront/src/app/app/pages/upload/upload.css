@@ -1,6 +1,13 @@
 .upload-page { max-width: 900px; }
-.upload-zone { min-height: 260px; display: grid; place-items: center; align-content: center; gap: 10px; border: 1px dashed rgba(120, 207, 255, .5); border-radius: 18px; background: rgba(255,255,255,.035); color: var(--text); cursor: pointer; text-align: center; }
+.upload-zone { min-height: 260px; display: grid; place-items: center; align-content: center; gap: 10px; border: 1px dashed var(--accent-bright); border-radius: 18px; background: var(--veil-035); color: var(--text); cursor: pointer; text-align: center; }
 .upload-zone small { color: var(--muted); }
 .upload-zone input { display: none; }
-.upload-icon { width: 54px; height: 54px; display: grid; place-items: center; border-radius: 15px; background: rgba(92,174,255,.14); color: #78cfff; font-size: 28px; }
+.upload-zone.uploading { opacity: .7; cursor: wait; }
+.upload-icon { width: 54px; height: 54px; display: grid; place-items: center; border-radius: 15px; background: var(--veil-blue); color: var(--accent); font-size: 28px; }
 .form-message { color: var(--success); font-size: 12px; }
+.form-error { color: var(--accent-red); font-size: 12px; }
+.upload-actions { display: flex; align-items: center; gap: 16px; margin-top: 16px; }
+.upload-actions a, .library-link { color: var(--accent); font-size: 12px; text-decoration: none; }
+.upload-button { padding: 12px 16px; border: 0; border-radius: 11px; background: linear-gradient(135deg,var(--accent),var(--accent)); color: white; font: inherit; cursor: pointer; }
+.upload-button:disabled { opacity: .6; cursor: wait; }
+.library-link { display: inline-block; margin-top: 18px; }

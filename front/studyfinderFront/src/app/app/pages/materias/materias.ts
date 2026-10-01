@@ -4,13 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { SearchService } from '../../../services/search.service';
 import { StudyDataService, SavedDocument, CustomMateria } from '../../../services/study-data.service';
+import { DocumentService, LibraryDocument } from '../../../services/document.service';
 
 interface Documento {
-  id: number;
-  nombre: string;
-  tipo: string;
-  fecha: string;
-  tamano: string;
+  id: string;
+  filename: string;
+  contentType: string;
+  size: number;
+  createdAt: string;
 }
 
 interface Materia {
@@ -29,52 +30,12 @@ interface Materia {
 })
 export class MateriasComponent {
   materias = signal<Materia[]>([
-    {
-      id: 1,
-      nombre: 'Ingeniería de Software',
-      documentos: [
-        { id: 1, nombre: 'Capitulo 4 - Arquitectura MVC.pdf', tipo: 'pdf', fecha: '10 jul 2026', tamano: '2.4 MB' },
-        { id: 2, nombre: 'Diagrama de clases.pdf', tipo: 'pdf', fecha: '08 jul 2026', tamano: '1.1 MB' },
-        { id: 3, nombre: 'Resumen patrones de diseño.docx', tipo: 'docx', fecha: '02 jul 2026', tamano: '540 KB' },
-      ]
-    },
-    {
-      id: 2,
-      nombre: 'Cálculo II',
-      documentos: [
-        { id: 4, nombre: 'Integrales dobles.pdf', tipo: 'pdf', fecha: '15 jul 2026', tamano: '3.1 MB' },
-        { id: 5, nombre: 'Ejercicios semana 6.pdf', tipo: 'pdf', fecha: '12 jul 2026', tamano: '890 KB' },
-      ]
-    },
-    {
-      id: 3,
-      nombre: 'Física',
-      documentos: [
-        { id: 6, nombre: 'Cinemática - diapositivas.pptx', tipo: 'pptx', fecha: '09 jul 2026', tamano: '4.7 MB' },
-      ]
-    },
-    {
-      id: 4,
-      nombre: 'Programación',
-      documentos: [
-        { id: 7, nombre: 'Estructuras de datos.pdf', tipo: 'pdf', fecha: '18 jul 2026', tamano: '2.9 MB' },
-        { id: 8, nombre: 'Notas árboles binarios.pdf', tipo: 'pdf', fecha: '14 jul 2026', tamano: '1.3 MB' },
-      ]
-    },
-    {
-      id: 5,
-      nombre: 'Inglés',
-      documentos: [
-        { id: 9, nombre: 'Vocabulario unidad 3.pdf', tipo: 'pdf', fecha: '11 jul 2026', tamano: '620 KB' },
-      ]
-    },
-    {
-      id: 6,
-      nombre: 'Matemáticas',
-      documentos: [
-        { id: 10, nombre: 'Álgebra lineal - apuntes.pdf', tipo: 'pdf', fecha: '16 jul 2026', tamano: '1.8 MB' },
-      ]
-    },
+    { id: 1, nombre: 'Ingeniería de Software', documentos: [] },
+    { id: 2, nombre: 'Cálculo II', documentos: [] },
+    { id: 3, nombre: 'Física', documentos: [] },
+    { id: 4, nombre: 'Programación', documentos: [] },
+    { id: 5, nombre: 'Inglés', documentos: [] },
+    { id: 6, nombre: 'Matemáticas', documentos: [] },
   ]);
 
   materiaSeleccionada = signal<Materia | null>(null);
@@ -87,8 +48,14 @@ export class MateriasComponent {
   newMateriaName = '';
   newMateriaDescription = '';
   materiaError = '';
+  selectorBibliotecaAbierto = false;
+  documentosBiblioteca: LibraryDocument[] = [];
+  documentosDeMateria: LibraryDocument[] = [];
+  cargandoBiblioteca = false;
+  guardandoDocumentoId: string | null = null;
+  errorBiblioteca = '';
 
-  constructor(private searchService: SearchService, private studyData: StudyDataService) {
+  constructor(private searchService: SearchService, private studyData: StudyDataService, private documentService: DocumentService) {
     const changes = this.studyData.getMateriaChanges();
     this.materias.update(items => [
       ...items.filter(item => !changes.deletedMateriaIds.includes(item.id)),
@@ -101,6 +68,79 @@ export class MateriasComponent {
 
   seleccionarMateria(materia: Materia) {
     this.materiaSeleccionada.set(materia);
+    this.cargarDocumentosDeMateria(materia);
+  }
+
+  private cargarDocumentosDeMateria(materia: Materia): void {
+    this.documentService.list(materia.nombre).subscribe({
+      next: documents => this.documentosDeMateria = documents,
+      error: () => this.errorBiblioteca = 'No se pudieron cargar los documentos de esta materia.'
+    });
+  }
+
+  abrirSelectorBiblioteca(): void {
+    this.selectorBibliotecaAbierto = true;
+    this.cargandoBiblioteca = true;
+    this.errorBiblioteca = '';
+    this.documentService.list().subscribe({
+      next: documents => {
+        this.documentosBiblioteca = documents;
+        this.cargandoBiblioteca = false;
+      },
+      error: () => {
+        this.errorBiblioteca = 'No se pudo cargar la Biblioteca. Comprueba tu sesión.';
+        this.cargandoBiblioteca = false;
+      }
+    });
+  }
+
+  estaEnMateria(document: LibraryDocument): boolean {
+    return this.documentosDeMateria.some(item => item.id === document.id);
+  }
+
+  agregarDesdeBiblioteca(document: LibraryDocument): void {
+    const materia = this.materiaSeleccionada();
+    if (!materia || this.estaEnMateria(document)) return;
+    this.guardandoDocumentoId = document.id;
+    this.documentService.addToMateria(document.id, materia.nombre).subscribe({
+      next: () => {
+        this.documentosDeMateria = [...this.documentosDeMateria, document];
+        this.guardandoDocumentoId = null;
+      },
+      error: () => {
+        this.errorBiblioteca = 'No se pudo añadir el documento a la materia.';
+        this.guardandoDocumentoId = null;
+      }
+    });
+  }
+
+  quitarDeMateria(document: LibraryDocument): void {
+    const materia = this.materiaSeleccionada();
+    if (!materia) return;
+    this.documentService.removeFromMateria(document.id, materia.nombre).subscribe({
+      next: () => this.documentosDeMateria = this.documentosDeMateria.filter(item => item.id !== document.id),
+      error: () => this.errorBiblioteca = 'No se pudo quitar el documento de la materia.'
+    });
+  }
+
+  descargar(document: LibraryDocument): void {
+    this.documentService.download(document.id).subscribe({
+      next: blob => {
+        const url = URL.createObjectURL(blob);
+        const anchor = window.document.createElement('a');
+        anchor.href = url;
+        anchor.download = document.filename;
+        anchor.click();
+        // Revocar la URL en el mismo tick cancela la descarga en curso: el
+        // navegador todavia no ha leido el blob cuando click() retorna.
+        setTimeout(() => URL.revokeObjectURL(url), 0);
+      },
+      error: () => this.errorBiblioteca = 'No se pudo descargar el documento.'
+    });
+  }
+
+  tamanoLegible(bytes: number): string {
+    return bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
   crearMateria(): void {
@@ -127,6 +167,7 @@ export class MateriasComponent {
     this.materiaSeleccionada.set(null);
     this.previewDocument = null;
     this.searchResults = [];
+    this.selectorBibliotecaAbierto = false;
   }
 
   buscarDocumentos(): void {
@@ -173,33 +214,25 @@ export class MateriasComponent {
 
   eliminarMateria(materia: Materia, event: MouseEvent): void {
     event.stopPropagation();
-    this.materias.update(items => items.filter(item => item.id !== materia.id));
+    this.materias.update(items => {
+      const sinBorrar = items.filter(item => item.id !== materia.id);
+      const predefinidas = sinBorrar.filter(item => item.id < 1000);
+      // Los ids de las materias propias equivalen a su posicion en el
+      // almacenamiento (1000 + indice). Si no se renumeran aqui, borrar una
+      // materia propia del medio desalinea los ids del almacen, la siguiente
+      // materia creada repite un id vivo y removeMateria acabaria borrando la
+      // materia equivocada.
+      const propias = sinBorrar
+        .filter(item => item.id >= 1000)
+        .map((item, index) => ({ ...item, id: 1000 + index }));
+      return [...predefinidas, ...propias];
+    });
     this.studyData.removeMateria(materia.id);
     if (this.materiaSeleccionada()?.id === materia.id) this.volver();
-  }
-
-  eliminarDocumento(documento: Documento, event: MouseEvent): void {
-    event.stopPropagation();
-    const materia = this.materiaSeleccionada();
-    if (!materia) return;
-    this.materias.update(items => items.map(item => item.id === materia.id
-      ? { ...item, documentos: item.documentos.filter(document => document.id !== documento.id) }
-      : item));
-    this.materiaSeleccionada.set(this.materias().find(item => item.id === materia.id) || null);
   }
 
   eliminarGuardado(documento: SavedDocument, event: MouseEvent): void {
     event.stopPropagation();
     this.studyData.removeSavedDocument(documento.id);
-  }
-
-  iconoPorTipo(tipo: string): string {
-    const iconos: Record<string, string> = {
-      pdf: '📄',
-      docx: '📝',
-      pptx: '📊',
-      xlsx: '📈',
-    };
-    return iconos[tipo] ?? '📄';
   }
 }

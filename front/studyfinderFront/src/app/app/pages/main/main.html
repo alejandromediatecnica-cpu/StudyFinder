@@ -22,28 +22,78 @@
     </article>
     <article class="stat-card">
       <div class="stat-icon green">↗</div>
-      <div><span class="stat-label">Archivos subidos</span><strong>{{ stats.uploadedFiles.length }}</strong><em>Material propio</em></div>
+      <div><span class="stat-label">Tareas pendientes</span><strong>{{ pendingCount() }}</strong><em>{{ recentlyCompleted().length }} completada(s) recientemente</em></div>
     </article>
   </section>
 
   <section class="main-grid">
     <article class="glass-panel continue-panel">
-      <div class="panel-heading"><div><span class="eyebrow">RETOMAR</span><h2>Continúa estudiando</h2></div><button class="ghost-button">Ver todo →</button></div>
-      <div class="course-card">
-        <div class="course-art"><span>∑</span><small>04</small></div>
-        <div class="course-copy"><span class="tag">INGENIERÍA DE SOFTWARE</span><h3>Arquitectura MVC</h3><p>Capítulo 4 · 38 min restantes</p><div class="progress"><span style="width: 72%"></span></div><small>72% completado</small></div>
-        <button class="play-button">Continuar <span>→</span></button>
+      <div class="panel-heading">
+        <div><span class="eyebrow">MÁS URGENTE</span><h2>Tarea más urgente</h2></div>
+        <a class="ghost-button" routerLink="/tareas">Ver todas →</a>
       </div>
+
+      @if (urgentTask(); as task) {
+        <div class="course-card">
+          <div class="course-art" [class.due-today]="task.dueDate === ''">
+            <span>{{ task.type === 'trabajo' ? '✎' : task.type === 'evento' ? '✦' : '∑' }}</span>
+            <small>{{ etiquetaFecha(task) }}</small>
+          </div>
+          <div class="course-copy">
+            <span class="tag">{{ task.subject || task.type || 'tarea' }}</span>
+            <h3>{{ task.title }}</h3>
+            <p>
+              @if (task.dueDate) { 📅 {{ etiquetaFecha(task) }} }
+              @if (task.dueTime) { · ⏰ {{ task.dueTime }} }
+              @if (!task.dueDate && !task.dueTime) { Sin fecha de entrega }
+            </p>
+            @if (task.description) { <p class="task-note">{{ task.description }}</p> }
+            @if (task.documents?.length) { <p class="task-note">📎 {{ task.documents.length }} documento(s) adjunto(s)</p> }
+          </div>
+          <button class="play-button" type="button" (click)="completarUrgente()">Completado <span>✓</span></button>
+        </div>
+      } @else {
+        <div class="panel-empty">
+          <h3>No tienes tareas pendientes</h3>
+          <p>Crea una y aparecerá aquí la más urgente.</p>
+          <a class="play-button" routerLink="/tareas">Ir a Mis tareas <span>→</span></a>
+        </div>
+      }
     </article>
 
     <article class="glass-panel tasks-panel">
-      <div class="panel-heading"><div><span class="eyebrow">HOY</span><h2>Próximas tareas</h2></div><button class="circle-button">＋</button></div>
-      <div class="task-list">
-        <div class="task-item"><span class="task-check done">✓</span><div><strong>Matemáticas</strong><small>Integrales dobles</small></div><time>10:00</time></div>
-        <div class="task-item"><span class="task-check"> </span><div><strong>Física</strong><small>Entrega laboratorio</small></div><time>14:00</time></div>
-        <div class="task-item"><span class="task-check"> </span><div><strong>Programación</strong><small>Práctica de Angular</small></div><time>18:00</time></div>
-        <div class="task-item"><span class="task-check"> </span><div><strong>Inglés</strong><small>Vocabulario unidad 3</small></div><time>Mañana</time></div>
+      <div class="panel-heading">
+        <div><span class="eyebrow">PRÓXIMAS</span><h2>Próximas tareas</h2></div>
+        <a class="circle-button" routerLink="/tareas" aria-label="Ir a Mis tareas">＋</a>
       </div>
+
+      @if (upcomingTasks().length) {
+        <div class="task-list">
+          @for (task of upcomingTasks(); track task.id) {
+            <div class="task-item">
+              <button type="button" class="task-check" [class.done]="task.completed"
+                      (click)="completar(task, $event)"
+                      [attr.aria-label]="'Completar ' + task.title"></button>
+              <div>
+                <strong>{{ task.title }}</strong>
+                <small>{{ task.subject || 'Sin materia' }}</small>
+              </div>
+              <time>{{ etiquetaFecha(task) }}</time>
+            </div>
+          }
+        </div>
+      } @else {
+        <p class="panel-empty-text">No hay tareas próximas. Crea una para empezar.</p>
+      }
+
+      @if (recentlyCompleted().length) {
+        <div class="done-block">
+          <span class="done-label">Completadas recientemente</span>
+          @for (task of recentlyCompleted(); track task.id) {
+            <div class="done-item"><span class="task-check done">✓</span>{{ task.title }}</div>
+          }
+        </div>
+      }
     </article>
   </section>
 </div>

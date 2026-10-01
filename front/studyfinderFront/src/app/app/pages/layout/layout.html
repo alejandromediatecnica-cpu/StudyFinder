@@ -28,6 +28,11 @@
         <span>Mis materias</span>
       </a>
 
+      <a routerLink="/biblioteca" routerLinkActive="active">
+        <span class="nav-icon">▤</span>
+        <span>Biblioteca</span>
+      </a>
+
       <a routerLink="/calendario" routerLinkActive="active">
         <span class="nav-icon">□</span>
         <span>Calendario</span>
@@ -94,17 +99,7 @@
             placeholder="Buscar documentos, materias..."
             [(ngModel)]="searchQuery"
             (input)="onSearchInput($any($event.target).value)"
-            (keydown)="onSearchKeydown($event)"
           />
-
-          <button
-            class="search-button"
-            (click)="search()"
-            [disabled]="searching"
-            *ngIf="false"
-          >
-            {{ searching ? '...' : 'Buscar' }}
-          </button>
 
         </div>
 
@@ -115,14 +110,14 @@
 
         <div
           class="search-results"
-          [class.search-results-empty]="!searching && !error && !searchResults.length"
-          *ngIf="showResults"
+          [class.search-results-empty]="!searching() && !error() && !searchResults().length"
+          *ngIf="showResults()"
         >
 
           <!-- Buscando -->
           <div
             class="search-loading"
-            *ngIf="searching"
+            *ngIf="searching()"
           >
             Buscando documentos...
           </div>
@@ -131,16 +126,16 @@
           <!-- Error -->
           <div
             class="search-error"
-            *ngIf="error"
+            *ngIf="error()"
           >
-            {{ error }}
+            {{ error() }}
           </div>
 
 
           <!-- Sin resultados -->
           <div
             class="no-results"
-            *ngIf="!searching && !error && searchResults.length === 0"
+            *ngIf="!searching() && !error() && searchResults().length === 0"
           >
             No encontramos resultados.
           </div>
@@ -148,7 +143,7 @@
 
           <!-- Resultados -->
           <a
-            *ngFor="let result of searchResults"
+            *ngFor="let result of searchResults()"
             class="search-result"
             [href]="result.url || '#'"
             target="_blank"

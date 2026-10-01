@@ -1,12 +1,12 @@
 import hashlib
 import secrets
-import sqlite3
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Header, HTTPException, status
 from pydantic import BaseModel, EmailStr, Field
+from pymongo.errors import DuplicateKeyError
 
-from app.database import users_collection
+from app.database import create_session, revoke_session, users_collection
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -56,10 +56,10 @@ def signup(payload: SignupRequest):
     }
     try:
         result = users_collection.insert_one(user)
-    except sqlite3.IntegrityError:
+    except DuplicateKeyError:
         raise HTTPException(status_code=409, detail="El correo ya esta registrado")
     user["_id"] = result.inserted_id
-    return user_response(user, secrets.token_urlsafe(32))
+    return user_response(user, create_session(str(user["_id"])))
 
 
 @router.post("/login")
@@ -73,4 +73,11 @@ def login(payload: LoginRequest):
     if not secrets.compare_digest(password_hash, user["password_hash"]):
         raise HTTPException(status_code=401, detail="Correo o contrasena incorrectos")
 
-    return user_response(user, secrets.token_urlsafe(32))
+    return user_response(user, create_session(str(user["_id"])))
+
+
+@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
+def logout(authorization: str | None = Header(default=None)):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Inicia sesión para continuar.")
+    revoke_session(authorization.removeprefix("Bearer ").strip())
