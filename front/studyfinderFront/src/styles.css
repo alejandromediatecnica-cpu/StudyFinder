@@ -1,21 +1,128 @@
-/* You can add global styles to this file, and also import other style files */
+/* ==================================================================
+   Tokens
+   ------------------------------------------------------------------
+   Todo el color de la app sale de estas variables. Cada tema redefine
+   los valores, asi que las hojas de pagina no llevan colores sueltos.
+   ================================================================== */
 
-:root {
-  --primary: #152C5B;
-  --secondary: #15B9EA;
-  --background: #EBEBEB;
-  --card: #FFFFFF;
+:root,
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --primary: #4f8cff;
+  --primary-strong: #2f6ff5;
+  --secondary: #62d6ff;
+  --background: #050814;
+  --surface: rgba(11, 18, 37, .72);
+  --surface-strong: rgba(13, 22, 45, .9);
+  --surface-soft: rgba(255, 255, 255, .055);
+  --border: rgba(255, 255, 255, .10);
+  --text: #f5f8ff;
+  --muted: #9ca9c2;
+  --success: #45d39a;
+  --warning: #ffca68;
+  --danger: #ff6b81;
+  --card: rgba(13, 21, 42, .72);
+  --shadow: 0 22px 60px rgba(0, 0, 0, .32);
+  --radius-lg: 24px;
+  --radius-md: 18px;
+
+  /* --- capas de superficie --- */
+  --app-bg: #050814;
+  --panel: linear-gradient(145deg, rgba(17, 28, 55, .76), rgba(7, 14, 31, .68));
+  --panel-solid: #0b1225;
+  --panel-raised: rgba(255, 255, 255, .035);
+  --panel-inset: rgba(255, 255, 255, .018);
+  --panel-hover: rgba(79, 140, 255, .08);
+  --panel-overlay: rgba(9, 17, 36, .98);
+  --panel-field: rgba(255, 255, 255, .04);
+  --panel-field-focus: rgba(79, 140, 255, .10);
+  --panel-dark: #07102a;
+  --panel-sunken: #050c1c;
+  /* Superficie translucida: sidebar, tarjetas y paneles con blur detras. */
+  --panel-veil: rgba(15, 22, 41, .82);
+  --panel-veil-strong: rgba(13, 19, 36, .96);
+  /* Tarjetas de escaparate del hero: llevan texto blanco encima, asi que se
+     mantienen oscuras en los dos temas para no perder el contraste. */
+  --showcase: linear-gradient(145deg, rgba(20, 44, 86, .92), rgba(8, 17, 40, .92));
+
+  /* --- texto --- */
+  --text-strong: #f5f8ff;
+  --text-body: #dbe6f9;
+  --text-muted: #9ca9c2;
+  --text-faint: #74829b;
+  --text-ghost: #5d7192;
+  --text-on-accent: #ffffff;
+
+  /* --- bordes --- */
+  --line: rgba(255, 255, 255, .10);
+  --line-soft: rgba(255, 255, 255, .06);
+  --line-strong: rgba(255, 255, 255, .16);
+  --line-accent: rgba(120, 207, 255, .30);
+
+  /* --- acentos --- */
+  --accent: #4f8cff;
+  --accent-bright: #69cfff;
+  --accent-cyan: #62d6ff;
+  --accent-violet: #9b74ff;
+  --accent-green: #45d39a;
+  --accent-red: #ff6b81;
+  --accent-amber: #ffca68;
+  --accent-deep: #24355a;
+  --accent-grad: linear-gradient(135deg, #5caeff, #376cf5);
+  --accent-glow: rgba(57, 112, 255, .28);
+
+  /* --- velos de color (fondos sutiles) --- */
+  --veil-025: rgba(255, 255, 255, .025);
+  --veil-035: rgba(255, 255, 255, .035);
+  --veil-045: rgba(255, 255, 255, .045);
+  --veil-06: rgba(255, 255, 255, .06);
+  --veil-08: rgba(255, 255, 255, .08);
+  --veil-12: rgba(255, 255, 255, .12);
+  --veil-blue: rgba(92, 174, 255, .14);
+  --veil-blue-soft: rgba(92, 174, 255, .10);
+  --veil-cyan: rgba(105, 207, 255, .18);
+  --veil-violet: rgba(139, 93, 255, .13);
+  --veil-green: rgba(69, 211, 154, .14);
+  --veil-red: rgba(255, 154, 170, .10);
+  --veil-amber: rgba(255, 202, 104, .14);
+
+  /* --- sombras --- */
+  --shadow-soft: 0 10px 30px rgba(0, 0, 0, .28);
+  --shadow-deep: 0 26px 60px rgba(0, 0, 0, .5);
+  --shade: rgba(0, 0, 0, .32);
 }
 
-html, body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
-}
+
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+button, input, textarea, select {
+  font: inherit;
+}
+
+button {
+  border: 0;
+}
+
+.auth-link {
+  display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 0 14px;
+  color: #c5cede; background: rgba(255,255,255,.045); border: 1px solid var(--border); border-radius: 12px;
+  text-decoration: none; font-size: 11px; font-weight: 700; white-space: nowrap; cursor: pointer; transition: .2s ease;
+}
+.auth-link:hover { color: white; background: rgba(255,255,255,.09); border-color: rgba(122,196,255,.38); transform: translateY(-1px); }
+.auth-link:focus-visible { outline: 2px solid #69cfff; outline-offset: 3px; }
+.auth-link:active { transform: translateY(0); }
+.auth-link.primary { color: white; background: linear-gradient(135deg, #5caeff, #376cf5); border-color: rgba(125,205,255,.55); box-shadow: 0 8px 20px rgba(55,108,245,.25); }
+.auth-link.primary:hover { filter: brightness(1.08); box-shadow: 0 10px 24px rgba(55,108,245,.35); }
+.auth-link.active { color: white; border-color: #69cfff; }
+
+* {
+  box-sizing: border-box;
 }
 
 app-root {
@@ -24,6 +131,11 @@ app-root {
   min-height: 100vh;
 }
 
-* {
-  box-sizing: border-box;
+::selection {
+  background: rgba(79, 140, 255, .35);
+  color: white;
+}
+
+@media (max-width: 560px) {
+  .auth-link { min-height: 36px; padding: 0 9px; font-size: 10px; }
 }

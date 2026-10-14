@@ -1,121 +1,99 @@
-<div class="dashboard">
+<div class="dashboard-page">
+  <section class="welcome-row">
+    <div>
+      <div class="eyebrow">TU ESPACIO DE APRENDIZAJE</div>
+      <h1>Bienvenido {{ user?.name || '' }} <span>👋</span></h1>
+      <p>Todo lo que necesitas para estudiar, organizado en un solo lugar.</p>
+    </div>
+  </section>
 
-    <aside class="sidebar">
+  <section class="stats-grid">
+    <article class="stat-card">
+      <div class="stat-icon blue">◷</div>
+      <div><span class="stat-label">Búsquedas realizadas</span><strong>{{ stats.searches }}</strong><em>Actividad de tu cuenta</em></div>
+    </article>
+    <article class="stat-card">
+      <div class="stat-icon cyan">✦</div>
+      <div><span class="stat-label">Sesiones abiertas</span><strong>{{ stats.studySessions }}</strong><em>Desde este dispositivo</em></div>
+    </article>
+    <article class="stat-card">
+      <div class="stat-icon violet">▦</div>
+      <div><span class="stat-label">Documentos guardados</span><strong>{{ stats.savedDocuments.length }}</strong><em>En tu biblioteca</em></div>
+    </article>
+    <article class="stat-card">
+      <div class="stat-icon green">↗</div>
+      <div><span class="stat-label">Tareas pendientes</span><strong>{{ pendingCount() }}</strong><em>{{ recentlyCompleted().length }} completada(s) recientemente</em></div>
+    </article>
+  </section>
 
-        <div class="logo">
+  <section class="main-grid">
+    <article class="glass-panel continue-panel">
+      <div class="panel-heading">
+        <div><span class="eyebrow">MÁS URGENTE</span><h2>Tarea más urgente</h2></div>
+        <a class="ghost-button" routerLink="/tareas">Ver todas →</a>
+      </div>
 
-            <h2>StudyFinder</h2>
-
-            <span>Smart Learning</span>
-
+      @if (urgentTask(); as task) {
+        <div class="course-card">
+          <div class="course-art" [class.due-today]="etiquetaFecha(task) === 'Hoy'">
+            <span>{{ task.type === 'trabajo' ? '✎' : task.type === 'evento' ? '✦' : '∑' }}</span>
+            <small>{{ etiquetaFecha(task) }}</small>
+          </div>
+          <div class="course-copy">
+            <span class="tag">{{ task.subject || task.type || 'tarea' }}</span>
+            <h3>{{ task.title }}</h3>
+            <p>
+              @if (task.dueDate) { 📅 {{ etiquetaFecha(task) }} }
+              @if (task.dueTime) { · ⏰ {{ task.dueTime }} }
+              @if (!task.dueDate && !task.dueTime) { Sin fecha de entrega }
+            </p>
+            @if (task.description) { <p class="task-note">{{ task.description }}</p> }
+            @if (task.documents?.length) { <p class="task-note">📎 {{ task.documents.length }} documento(s) adjunto(s)</p> }
+          </div>
+          <button class="play-button" type="button" (click)="completarUrgente()">Completado <span>✓</span></button>
         </div>
-                                    
-<nav>
-    <a routerLink="/main" routerLinkActive="active">🏠 Inicio</a>
-    <a routerLink="/materias" routerLinkActive="active">📚 Mis materias</a>
-    <a routerLink="/calendario" routerLinkActive="active">📅 Calendario</a>
-    <a routerLink="/tareas" routerLinkActive="active">📝 Tareas</a>
-    <a routerLink="/ia" routerLinkActive="active">🤖 IA</a>
-    <a routerLink="/estadisticas" routerLinkActive="active">📊 Estadísticas</a>
-    <a routerLink="/configuracion" routerLinkActive="active">⚙ Configuración</a>
-</nav>
+      } @else {
+        <div class="panel-empty">
+          <h3>No tienes tareas pendientes</h3>
+          <p>Crea una y aparecerá aquí la más urgente.</p>
+          <a class="play-button" routerLink="/tareas">Ir a Mis tareas <span>→</span></a>
+        </div>
+      }
+    </article>
 
-    </aside>
+    <article class="glass-panel tasks-panel">
+      <div class="panel-heading">
+        <div><span class="eyebrow">PRÓXIMAS</span><h2>Próximas tareas</h2></div>
+        <a class="circle-button" routerLink="/tareas" aria-label="Ir a Mis tareas">＋</a>
+      </div>
 
-    <section class="content">
-
-        <header>
-
-            <div>
-
-                <h1>Bienvenido 👋</h1>
-
-                <p>Organiza tu aprendizaje de forma inteligente.</p>
-
+      @if (upcomingTasks().length) {
+        <div class="task-list">
+          @for (task of upcomingTasks(); track task.id) {
+            <div class="task-item">
+              <button type="button" class="task-check" [class.done]="task.completed"
+                      (click)="completar(task, $event)"
+                      [attr.aria-label]="'Completar ' + task.title"></button>
+              <div>
+                <strong>{{ task.title }}</strong>
+                <small>{{ task.subject || 'Sin materia' }}</small>
+              </div>
+              <time>{{ etiquetaFecha(task) }}</time>
             </div>
+          }
+        </div>
+      } @else {
+        <p class="panel-empty-text">No hay tareas próximas. Crea una para empezar.</p>
+      }
 
-            <button>
-
-                + Nueva sesión
-
-            </button>
-
-        </header>
-
-        <section class="cards">
-
-            <div class="card">
-
-                <h3>Horas estudiadas</h3>
-
-                <span>24 h</span>
-
-            </div>
-
-            <div class="card">
-
-                <h3>Racha</h3>
-
-                <span>14 días</span>
-
-            </div>
-
-            <div class="card">
-
-                <h3>Materias</h3>
-
-                <span>6</span>
-
-            </div>
-
-            <div class="card">
-
-                <h3>Progreso</h3>
-
-                <span>82%</span>
-
-            </div>
-
-        </section>
-
-        <section class="bottom">
-
-            <div class="panel">
-
-                <h2>Continuar estudiando</h2>
-
-                <div class="course">
-
-                    <h3>Ingeniería de Software</h3>
-
-                    <p>Capítulo 4 - Arquitectura MVC</p>
-
-                    <button>Continuar</button>
-
-                </div>
-
-            </div>
-
-            <div class="panel">
-
-                <h2>Próximas tareas</h2>
-
-                <ul>
-
-                    <li>✔ Matemáticas</li>
-
-                    <li>✔ Física</li>
-
-                    <li>✔ Programación</li>
-
-                    <li>✔ Inglés</li>
-
-                </ul>
-
-            </div>
-
-        </section>
-
-    </section>
-
+      @if (recentlyCompleted().length) {
+        <div class="done-block">
+          <span class="done-label">Completadas recientemente</span>
+          @for (task of recentlyCompleted(); track task.id) {
+            <div class="done-item"><span class="task-check done">✓</span>{{ task.title }}</div>
+          }
+        </div>
+      }
+    </article>
+  </section>
 </div>

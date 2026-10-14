@@ -1,1 +1,152 @@
-<p>tareas works!</p>
+<div class="tasks-page">
+  <header class="page-header">
+    <div>
+      <div class="eyebrow">ORGANIZACIÓN</div>
+      <h1>Mis tareas</h1>
+      <p>Un vistazo rápido a lo que tienes pendiente.</p>
+    </div>
+    <button class="primary-button" type="button" (click)="abrirFormulario()">＋ Nueva tarea</button>
+  </header>
+
+  <div class="task-search">
+    <span>⌕</span>
+    <input [(ngModel)]="searchTerm" placeholder="Filtrar tareas mientras escribes..." aria-label="Buscar tareas">
+    <button *ngIf="searchTerm" type="button" (click)="clearSearch()" aria-label="Limpiar búsqueda">×</button>
+  </div>
+
+  <section class="task-stats">
+    <div><span>Pendientes</span><strong>{{ pendingCount }}</strong></div>
+    <div><span>Completadas</span><strong>{{ countByStatus('done') }}</strong></div>
+    <div><span>Para hoy</span><strong>{{ countByStatus('today') }}</strong></div>
+    <div><span>Total</span><strong>{{ totalCount }}</strong></div>
+  </section>
+
+  <section class="task-form-panel" *ngIf="showForm()">
+    <h2>{{ editingId ? 'Editar tarea' : 'Nueva tarea' }}</h2>
+    <div class="task-form-grid">
+      <label class="field">
+        <span>Título</span>
+        <input [(ngModel)]="formTitle" placeholder="Ej. Resolver integrales 1-5" aria-label="Título de la tarea">
+      </label>
+      <label class="field">
+        <span>Materia</span>
+        <app-styled-select [(ngModel)]="formSubject" [opciones]="materiaOpciones" placeholder="Sin materia" label="Materia" />
+      </label>
+      <label class="field">
+        <span>Tipo</span>
+        <app-styled-select [(ngModel)]="formType" [opciones]="tipoOpciones" placeholder="Tarea" label="Tipo" />
+      </label>
+      <div class="field">
+        <span>Fecha de entrega</span>
+        <app-date-picker [(ngModel)]="formDate" label="Fecha de entrega" placeholder="Sin fecha" />
+      </div>
+      <div class="field">
+        <span>Hora</span>
+        <app-styled-select [(ngModel)]="formTime" [opciones]="horaOpciones" placeholder="Sin hora" label="Hora" />
+      </div>
+      <label class="field wide">
+        <span>Descripción</span>
+        <input [(ngModel)]="formDescription" placeholder="Detalles opcionales" aria-label="Descripción">
+      </label>
+    </div>
+
+    <div class="document-attach">
+      <div class="attach-head">
+        <span class="attach-label">Documentos adjuntos</span>
+        <span class="attach-count" *ngIf="attachedDocuments.length">{{ attachedDocuments.length }}</span>
+      </div>
+      <ul class="attached-list" *ngIf="attachedDocuments.length">
+        <li class="attached" *ngFor="let doc of attachedDocuments; let i = index">
+          <span>📎 {{ doc.name }}</span>
+          <button type="button" (click)="quitarDocumento(i)" [attr.aria-label]="'Quitar ' + doc.name">×</button>
+        </li>
+      </ul>
+      <div class="attach-actions">
+        <button type="button" (click)="abrirSelectorDocumento('biblioteca')">＋ De mi biblioteca</button>
+        <button type="button" (click)="abrirSelectorDocumento('busqueda')">＋ Buscar en la API</button>
+      </div>
+    </div>
+
+    <p class="form-error" *ngIf="formError" role="alert">{{ formError }}</p>
+
+    <div class="form-actions">
+      <button class="primary-button" type="button" (click)="guardar()">{{ editingId ? 'Guardar cambios' : 'Crear tarea' }}</button>
+      <button class="ghost-button" type="button" (click)="cerrarFormulario()">Cancelar</button>
+    </div>
+  </section>
+
+  <section class="task-doc-picker" *ngIf="docPickerOpen()">
+    <div class="picker-head">
+      <div class="picker-tabs">
+        <button type="button" [class.active]="docPickerTab === 'biblioteca'" (click)="docPickerTab = 'biblioteca'">Mi biblioteca</button>
+        <button type="button" [class.active]="docPickerTab === 'busqueda'" (click)="docPickerTab = 'busqueda'">Buscar en la API</button>
+      </div>
+      <button type="button" class="ghost-button" (click)="cerrarSelectorDocumento()">Cerrar</button>
+    </div>
+
+    <div *ngIf="docPickerTab === 'busqueda'" class="picker-search">
+      <input [(ngModel)]="docSearchTerm" placeholder="Buscar documentos..." aria-label="Buscar documentos" (keydown.enter)="buscarDocumentos()">
+      <button type="button" class="primary-button" (click)="buscarDocumentos()">Buscar</button>
+    </div>
+
+    <p *ngIf="loadingDocuments() || loadingSearch()">Cargando…</p>
+    <p *ngIf="errorDocuments()" class="form-error" role="alert">{{ errorDocuments() }}</p>
+
+    <ul class="picker-list" *ngIf="docPickerTab === 'biblioteca' && !loadingDocuments()">
+      <li *ngFor="let doc of libraryDocuments()">
+        <span>{{ doc.filename }} ({{ doc.size }} B)</span>
+        <button type="button" (click)="adjuntarDocumento(doc, 'biblioteca')" [disabled]="yaAdjuntado(doc)">
+          {{ yaAdjuntado(doc) ? '✓ Adjunto' : 'Adjuntar' }}
+        </button>
+      </li>
+      <li *ngIf="!libraryDocuments().length">No tienes documentos en tu biblioteca.</li>
+    </ul>
+
+    <ul class="picker-list" *ngIf="docPickerTab === 'busqueda' && !loadingSearch()">
+      <li *ngFor="let result of searchResults()">
+        <span>{{ result.title }}</span>
+        <button type="button" (click)="adjuntarDocumento(result, 'busqueda')" [disabled]="yaAdjuntado(result)">
+          {{ yaAdjuntado(result) ? '✓ Adjunto' : 'Adjuntar' }}
+        </button>
+      </li>
+      <li *ngIf="!searchResults().length">Sin resultados todavía.</li>
+    </ul>
+
+    <div class="picker-foot" *ngIf="attachedDocuments.length">
+      <span>{{ attachedDocuments.length }} documento(s) listo(s) para guardar</span>
+      <button type="button" class="primary-button" (click)="cerrarSelectorDocumento()">Listo</button>
+    </div>
+  </section>
+
+  <section class="task-board">
+    <article class="task-column" *ngFor="let column of columns">
+      <div class="column-title">
+        <h2>{{ column.titulo }}</h2>
+        <span>{{ filteredTasks(column.status).length }}</span>
+      </div>
+      <div class="task-card" *ngFor="let task of filteredTasks(column.status)" [class.done]="task.completed">
+        <button type="button" class="check" (click)="toggleCompleted(task)" [attr.aria-label]="'Marcar completada: ' + task.title">{{ task.completed ? '✓' : '' }}</button>
+        <div class="task-body">
+          <strong>{{ task.title }}</strong>
+          <small>
+            <span class="tag">{{ tipoLabel(task.type) }}</span>
+            <span *ngIf="task.subject">{{ task.subject }}</span>
+            <span *ngIf="task.dueDate">📅 {{ task.dueDate }}</span>
+            <span *ngIf="task.dueTime">⏰ {{ task.dueTime }}</span>
+            <span *ngIf="task.documents?.length">📎 {{ task.documents.length }}</span>
+          </small>
+        </div>
+        <span class="task-actions">
+          <button type="button" (click)="editar(task)" aria-label="Editar tarea">✎</button>
+          <button type="button" (click)="eliminar(task, $event)" aria-label="Eliminar tarea">🗑</button>
+        </span>
+      </div>
+    </article>
+  </section>
+
+  <div class="tasks-empty" *ngIf="!tasks().length">
+    <h2>Todavía no tienes tareas</h2>
+    <p>Crea tu primera tarea y asígnale una fecha para verla en el calendario.</p>
+    <button class="primary-button" type="button" (click)="abrirFormulario()">＋ Nueva tarea</button>
+  </div>
+</div>
