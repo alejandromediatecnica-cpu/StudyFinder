@@ -2,6 +2,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
 
+from bson import ObjectId
+from bson.errors import InvalidId
 from pymongo import ASCENDING, MongoClient
 from pymongo.errors import DuplicateKeyError
 
@@ -10,6 +12,25 @@ from app.config import MONGODB_DATABASE, MONGODB_URL
 UPLOADS_PATH = Path(__file__).resolve().parent.parent / "uploads"
 
 _client: MongoClient | None = None
+
+
+def id_query(valor):
+    """Normaliza un id para compararlo con `_id`.
+
+    La base tiene ids legacy (enteros o sus strings, de la migracion SQLite)
+    mezclados con ObjectId nuevos. Devuelve el ObjectId si es valido, si no el
+    entero cuando el valor es numerico, y en ultimo caso el valor original.
+    """
+    if isinstance(valor, ObjectId):
+        return valor
+    try:
+        return ObjectId(valor)
+    except (InvalidId, TypeError):
+        pass
+    try:
+        return int(valor)
+    except (TypeError, ValueError):
+        return valor
 
 
 def get_client() -> MongoClient:
@@ -144,3 +165,7 @@ def delete_document(user_id: str, document_id: str) -> dict | None:
     materia_documents_collection.delete_many({"document_id": document_id})
     documents_collection.delete_one({"id": document_id, "user_id": user_id})
     return document
+
+
+contacts_collection = db["contacts"]
+messages_collection = db["messages"]

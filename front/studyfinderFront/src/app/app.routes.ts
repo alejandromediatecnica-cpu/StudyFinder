@@ -7,6 +7,7 @@ import { CalendarioComponent } from './app/pages/calendario/calendario';
 import { TareasComponent } from './app/pages/tareas/tareas';
 import { EstadisticasComponent } from './app/pages/estadisticas/estadisticas';
 import { ConfiguracionComponent } from './app/pages/configuracion/configuracion';
+import { MensajesComponent } from './app/pages/mensajes/mensajes';
 import { LoginComponent } from './app/pages/login/login';
 import { SignupComponent } from './app/pages/signup/signup';
 import { LandingComponent } from './app/pages/landing/landing';
@@ -41,6 +42,7 @@ export const routes: Routes = [
       { path: 'tareas', component: TareasComponent },
       { path: 'subir', component: UploadComponent },
       { path: 'biblioteca', component: LibraryComponent },
+      { path: 'mensajes', component: MensajesComponent },
       { path: 'estadisticas', component: EstadisticasComponent },
       { path: 'configuracion', component: ConfiguracionComponent },
     ]

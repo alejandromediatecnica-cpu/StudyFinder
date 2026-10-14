@@ -277,4 +277,69 @@ describe('StudyDataService', () => {
       expect(service.getEvents()).toHaveLength(0);
     });
   });
+
+  describe('migracion de adjuntos antiguos', () => {
+    const escribirTareas = (tareas: unknown[]): void => {
+      localStorage.setItem(
+        'studyfinder_data_guest',
+        JSON.stringify({ tasks: tareas, events: [] })
+      );
+    };
+
+    it('convierte documentId/documentName/documentUrl en documents[]', () => {
+      escribirTareas([
+        {
+          id: 't1',
+          title: 'Vieja',
+          status: 'pending',
+          completed: false,
+          createdAt: 'x',
+          updatedAt: 'x',
+          documentId: 'doc-1',
+          documentName: 'apunte.pdf',
+          documentUrl: 'http://x/apunte.pdf',
+        },
+      ]);
+
+      const [tarea] = service.getTasks();
+      expect(tarea.documents).toEqual([
+        { id: 'doc-1', name: 'apunte.pdf', url: 'http://x/apunte.pdf', origin: 'biblioteca' },
+      ]);
+      expect((tarea as any).documentId).toBeUndefined();
+    });
+
+    it('convierte el arreglo files en documents[]', () => {
+      escribirTareas([
+        {
+          id: 't2',
+          title: 'Con files',
+          status: 'pending',
+          completed: false,
+          createdAt: 'x',
+          updatedAt: 'x',
+          files: [{ id: 'a', name: 'uno.pdf', url: 'http://x/uno.pdf' }],
+        },
+      ]);
+
+      const [tarea] = service.getTasks();
+      expect(tarea.documents?.map(d => d.name)).toEqual(['uno.pdf']);
+    });
+
+    it('no toca las tareas que ya usan documents[]', () => {
+      escribirTareas([
+        {
+          id: 't3',
+          title: 'Nueva',
+          status: 'pending',
+          completed: false,
+          createdAt: 'x',
+          updatedAt: 'x',
+          documents: [{ id: 'z', name: 'ok.pdf', origin: 'busqueda' }],
+        },
+      ]);
+
+      const [tarea] = service.getTasks();
+      expect(tarea.documents).toEqual([{ id: 'z', name: 'ok.pdf', origin: 'busqueda' }]);
+    });
+  });
 });

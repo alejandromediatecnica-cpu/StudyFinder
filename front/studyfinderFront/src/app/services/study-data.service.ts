@@ -180,7 +180,8 @@ export class StudyDataService {
   }
 
   getTasks(): Task[] {
-    return this.read().tasks ?? [];
+    const tareas = this.read().tasks ?? [];
+    return tareas.map(task => this.migrateTaskAttachments(task));
   }
 
   addTask(task: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>): Task {
@@ -252,8 +253,51 @@ export class StudyDataService {
     this.write(data);
   }
 
+  /**
+   * Datos antiguos guardaban un unico adjunto en campos sueltos
+   * (documentId/documentName/documentUrl) o en `files`. Se normalizan a
+   * `documents: TaskDocument[]` al leerlos, sin tocar localStorage.
+   */
+  private migrateTaskAttachments(t: Task): Task {
+    if (Array.isArray(t.documents) && t.documents.length > 0) return t;
+
+    const anyT = t as any;
+    const documentos: TaskDocument[] = [];
+
+    if (anyT.documentId || anyT.documentName) {
+      documentos.push({
+        id: anyT.documentId || undefined,
+        name: anyT.documentName || anyT.nombre || 'Documento',
+        url: anyT.documentUrl || undefined,
+        origin: 'biblioteca'
+      });
+    }
+
+    if (Array.isArray(anyT.files)) {
+      for (const f of anyT.files) {
+        if (f && (f.name || f.nombre)) {
+          documentos.push({
+            id: f.id || undefined,
+            name: f.name || f.nombre,
+            url: f.url || undefined,
+            origin: 'biblioteca'
+          });
+        }
+      }
+    }
+
+    if (documentos.length === 0) return t;
+
+    const { documentId, documentName, documentUrl, documentType, files, ...rest } = anyT;
+    return { ...rest, documents: documentos } as Task;
+  }
+
   getEvents(): CalendarEvent[] {
-    return this.read().events ?? [];
+    const eventos = this.read().events ?? [];
+    return eventos.map(event => ({
+      ...event,
+      documents: Array.isArray(event.documents) ? event.documents : undefined
+    }));
   }
 
   addEvent(event: Omit<CalendarEvent, 'id'>): CalendarEvent {

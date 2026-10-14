@@ -16,7 +16,7 @@ pip install -r requirements.txt
 python -m uvicorn app.main:app --port 8000        # http://localhost:8000, docs at /docs
 
 # backend tests (needs `pip install -r requirements-dev.txt`; pytest is NOT in requirements.txt)
-python -m pytest                                   # 91 tests in backend/tests, all green
+python -m pytest                                   # 113 tests in backend/tests, all green
 
 # frontend
 cd front/studyfinderFront
@@ -36,7 +36,7 @@ Run the two dev servers concurrently; the frontend is useless without the backen
 
 ## Verification: `npm test` works — run BOTH `npm test` and `npm run build`
 
-`npm test` was originally broken because every `*.spec.ts` imported a class name without the `Component` suffix (renamed components). That was fixed; today the suite is **240 tests in 21 files, all green**, run by Vitest via the `@angular/build:unit-test` builder (jsdom, zoneless — no `zone.js`).
+`npm test` was originally broken because every `*.spec.ts` imported a class name without the `Component` suffix (renamed components). That was fixed; today the suite is **274 tests in 24 files, all green**, run by Vitest via the `@angular/build:unit-test` builder (jsdom, zoneless — no `zone.js`).
 
 - Test wiring lives in `front/studyfinderFront/angular.json` (`test` target), `tsconfig.spec.json`, and `src/test-setup.ts` (clears `localStorage`, stubs `confirm` and the Object-URL API between tests). Run a subset with `npx ng test --include "src/app/app/pages/login/login.spec.ts"`.
 - Test conventions: services are tested through `HttpTestingController` against the real hardcoded URLs; `urlWithParams`/query-string matches must include the full URL. Component specs mount the standalone component directly and rely on the shared mocks.
@@ -59,22 +59,31 @@ Run the two dev servers concurrently; the frontend is useless without the backen
 ## Auth model
 
 - Opaque bearer tokens: `auth_sessions` collection, token minted on signup/login, never expires. Frontend stores it in `localStorage` under `studyfinder_token` / `studyfinder_user`.
+- **IDs legacy**: la migración SQLite dejó `users._id` como enteros (1..4) y `auth_sessions.user_id` como su string (`"3"`). Nunca hagas `ObjectId(user_id)` directo: usa `database.id_query(...)`, que devuelve ObjectId si es válido, si no el entero, y si no el valor tal cual, para comparar contra `_id`. Está aplicado en `deps.py` y en `api/contacts.py`; `api/messages.py` valida el destinatario buscándolo con `id_query`.
 - `GET /search` is **unauthenticated**. `/documents/*` and `/auth/logout` require `Authorization: Bearer <token>` and are scoped to the token's `user_id` (cascade of associations on delete lives in `delete_document`, since Mongo has no FK). Deleting a document is owner-only; reading/downloading/assigning is open to any `Bearer` holder.
 - Uploads land in `backend/uploads/<user_id>/<uuid><ext>`; 25 MB per-file cap and a 3 MB per-user storage quota; only pdf/doc/docx/ppt/pptx/xls/xlsx.
+
+## Mensajería (chat entre usuarios)
+
+- Los contactos se agregan **por nombre**: `GET /users/search?nombre=<texto>` (`app/api/users.py`) devuelve hasta 20 usuarios cuyo `name` coincide de forma parcial e insensible a mayúsculas (`$regex` con `re.escape`, excluye al propio usuario; con menos de 2 caracteres devuelve `[]`). No hay códigos ni emails como identificador público: el usuario elige de esa lista y `POST /contacts/requests` recibe `{"usuario_id": "<id>"}`.
+- Colecciones `contacts` y `messages` (`app/database.py`, creadas sin índice especial). Un contacto es un documento con `a_id`/`b_id` normalizados por orden (`_norm_id`), `emisor_id`/`receptor_id` y `estado` `pendiente|aceptado|rechazado`. Rutas en `app/api/contacts.py` (`/contacts/requests`, `/requests/incoming`, `/requests/outgoing`, `/requests/{id}/accept|reject`, `GET /contacts/`). Los pagos de emisor/receptor/otro exponen `name` y `email` (ya no `codigo`).
+- Rutas en `app/api/messages.py`: `GET /messages/{otro_id}` (historial `conversacion_id` = ids ordenados unidos por `|`, `limit` 1..100, `before` para paginar) y `POST /messages/{otro_id}` (FormData `texto` + `archivo` opcional, ≤3 MB, guardado en `uploads/<user_id>/<token>.<ext>`). Los endpoints de descarga viven en `app/api/messages_files.py`.
+- **Regla dura**: solo contactos `aceptado` pueden leer o enviar mensajes (`_ensure_contact`, si no → 403). El tester `backend/tests/test_chat.py` cubre perfil/búsqueda por nombre, solicitudes y mensajes (texto, archivos y límite); `conftest._COLLECTIONS` vacía también `contacts` y `messages`.
+- Frontend: `src/app/services/messages.service.ts` (métodos `getMe`, `search`, `contacts`, `incoming`, `outgoing`, `sendRequest`, `accept`, `reject`, `messages`, `send`, `attachmentUrl`) y `pages/mensajes` (componente con **signals** porque todo llega por `subscribe`; busca por nombre y muestra los resultados con botón "Agregar").
 
 ## Frontend gotchas
 
 - Pages live at `src/app/app/pages/**` — a **double `app/`**. Services live one level up at `src/app/services/**`, imported as `'../../../services/...'`. This looks like a mistake but is the current structure; flattening it means rewriting every import.
 - Auth is `localStorage`-only and SSR prerenders `**` (`app.routes.server.ts`), so server-side rendering always treats the user as logged out. Guard any browser-only API (`window.*`, `localStorage.*` reads outside the existing `typeof localStorage === 'undefined'` guards).
-- There is **no `zone.js`** and no `provideZonelessChangeDetection`, so the app runs in Angular's zoneless mode: plain class-field mutations made inside async callbacks (e.g. `subscribe({ error: ... })`) never re-render the template. State that changes asynchronously and appears in the template must be a `signal()` (e.g. `LoginComponent`, `SignupComponent`, `LayoutComponent`, `UploadComponent` and `LibraryComponent`). `ChangeDetectorRef` is not used anywhere yet. Rule of thumb: if a value is set inside a `subscribe` callback, make it a signal.
+- There is **no `zone.js`** and no `provideZonelessChangeDetection`, so the app runs in Angular's zoneless mode: plain class-field mutations made inside async callbacks (e.g. `subscribe({ error: ... })`) never re-render the template. State that changes asynchronously and appears in the template must be a `signal()` (e.g. `LoginComponent`, `SignupComponent`, `LayoutComponent`, `UploadComponent`, `LibraryComponent` and `MensajesComponent`). `ChangeDetectorRef` is not used anywhere yet. Rule of thumb: if a value is set inside a `subscribe` callback, make it a signal.
 - `src/app/app/pages/materias/materias.ts` encodes the built-in materias as IDs `1..6`; user-created ones get `1000 + index`, and deletions are tracked in `deletedMateriaIds` in `StudyDataService`. Changing the built-in list breaks that ID arithmetic.
 - `src/app/services/study-data.service.ts` is a `localStorage` shim (searches, saved docs, stats, materias, **tasks and calendar events**) — it is the only "state" for most pages, and is namespaced per user ID.
 - Tareas and Calendario share state through that service (there is **no MongoDB backend for tasks/events**; they are per-browser `localStorage`). `addTask`/`updateTask` call the private `sincronizaEventoDeTarea`, which creates, moves or deletes the linked `CalendarEvent` (matched by `taskId`), so a task with a `dueDate` always shows up in Calendario exactly once and `removeTask` takes its event with it. Don't re-create the event in the page: the service owns that invariant.
 - `Task.documents: TaskDocument[]` is the only place attachments live — **several documents per task** are allowed, and the array is copied wholesale into the linked `CalendarEvent`. There is no singular `documentId`/`documentName` any more; don't reintroduce it.
-- `MainComponent` (`pages/main`) has no hardcoded data: `urgentTask`/`upcomingTasks`/`recentlyCompleted` are `computed()` over the same `StudyDataService.getTasks()`, so completing a task from the dashboard moves it to Tareas → Completadas. Urgency order = overdue first, then nearest `dueDate`/`dueTime`; undated tasks sort last. The dashboard's "Completado" button is only a `toggleTask`, no percentage progress.
+- `MainComponent` (`pages/main`) has no hardcoded data: `urgentTask`/`upcomingTasks`/`recentlyCompleted` are `computed()` over the same `StudyDataService.getTasks()`, so completing a task from the dashboard moves it to Tareas → Completadas. Urgency order = overdue first, then nearest `dueDate`/`dueTime`; undated tasks sort last. `upcomingTasks` **excludes the urgent task** (it is already shown in the big card) and caps at 4; keep code and `main.spec.ts` in sync if you change that. The dashboard's "Completado" button is only a `toggleTask`, no percentage progress.
 - `src/app/app/components/date-picker.ts` and `styled-select.ts` replace the native `<input type="date">`/`<select>`, which ignore the dark theme. Both are `model()`-based so they work with `[(ngModel)]` like a plain input, close on outside click via `HostListener`, and are the components to reuse for any new date/dropdown field.
 - `Task.status` is stored but the board column is derived by `TareasComponent.statusActual` from `completed` + `dueDate` (completed → Completadas, no date → Pendientes, due today or earlier → Hoy, within 7 days → Esta semana, later → Pendientes). Task filtering is accent-insensitive via `sinAcentos()`.
-- Global design tokens are CSS custom properties in `src/styles.css` (`--primary`, `--surface`, `--border`, `--radius-md`, ...). Page CSS consumes those; there is no component library or theme file.
+- Global design tokens are CSS custom properties in `src/styles.css` (`--primary`, `--surface`, `--border`, `--radius-md`, ...). Page CSS consumes those; there is no component library or theme file. Solo existe tema oscuro (no hay bloque `:root[data-theme='light']`); `ThemeService` (`services/theme.service.ts`) gestiona la clave `studyfinder_theme`.
 - Some UI is intentionally decorative: the Configuración page and the Study AI chat have no backend and are not wired up. Don't implement them; they were deliberately left as-is to keep the scope to real bugs. The login/signup timeout error copy no longer mentions MongoDB, and `index.html` has `lang="es"`.
 - `front.zip` at the repo root is a committed snapshot of the frontend, not a build input. Editing or "refreshing" it does nothing to the running app.
 

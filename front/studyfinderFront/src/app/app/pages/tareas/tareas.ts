@@ -77,9 +77,11 @@ export class TareasComponent implements OnInit {
 
   /** Horarios en cuartos de hora: es lo habitual para entregas y estudio. */
   readonly horaOpciones = Array.from({ length: 4 * 24 }, (_, i) => {
-    const minutos = (i + 1) * 15;
-    const hora = String(Math.floor(minutos / 60)).padStart(2, '0');
-    const resto = String(minutos % 60).padStart(2, '0');
+    const minutos = i * 15;
+    const h = Math.floor(minutos / 60) % 24;
+    const m = minutos % 60;
+    const hora = String(h).padStart(2, '0');
+    const resto = String(m).padStart(2, '0');
     return { value: `${hora}:${resto}`, label: `${hora}:${resto}` };
   });
 

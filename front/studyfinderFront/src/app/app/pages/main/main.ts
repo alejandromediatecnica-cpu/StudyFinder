@@ -33,6 +33,10 @@ export class MainComponent implements OnInit {
     const urgentes = this.tasks()
       .filter(task => !task.completed)
       .sort((a, b) => this.urgencia(a) - this.urgencia(b));
+    const urgent = this.urgentTask();
+    if (urgent) {
+      return urgentes.filter(t => t.id !== urgent.id).slice(0, 4);
+    }
     return urgentes.slice(0, 4);
   });
 

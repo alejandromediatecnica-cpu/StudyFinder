@@ -35,7 +35,7 @@
 
       @if (urgentTask(); as task) {
         <div class="course-card">
-          <div class="course-art" [class.due-today]="task.dueDate === ''">
+          <div class="course-art" [class.due-today]="etiquetaFecha(task) === 'Hoy'">
             <span>{{ task.type === 'trabajo' ? '✎' : task.type === 'evento' ? '✦' : '∑' }}</span>
             <small>{{ etiquetaFecha(task) }}</small>
           </div>

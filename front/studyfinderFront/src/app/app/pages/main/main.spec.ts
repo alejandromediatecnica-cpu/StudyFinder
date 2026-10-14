@@ -131,12 +131,14 @@ describe('MainComponent', () => {
       studyData.addTask({ title: 'C', status: 'pending', completed: false, dueDate: enDias(3) });
       component.cargar();
 
-      expect(component.upcomingTasks().map(t => t.title)).toEqual(['A', 'B', 'C']);
+      expect(component.urgentTask()?.title).toBe('A');
+      expect(component.upcomingTasks().map(t => t.title)).toEqual(['B', 'C']);
     });
 
     it('excluye las completadas', () => {
-      studyData.addTask({ title: 'Hecha', status: 'done', completed: true, dueDate: enDias(-1) });
-      studyData.addTask({ title: 'Pendiente', status: 'pending', completed: false, dueDate: enDias(1) });
+      studyData.addTask({ title: 'Hecha', status: 'done', completed: true, dueDate: enDias(0) });
+      studyData.addTask({ title: 'Urgente', status: 'pending', completed: false, dueDate: enDias(1) });
+      studyData.addTask({ title: 'Pendiente', status: 'pending', completed: false, dueDate: enDias(2) });
       component.cargar();
 
       expect(component.upcomingTasks().map(t => t.title)).toEqual(['Pendiente']);
@@ -150,13 +152,17 @@ describe('MainComponent', () => {
       expect(component.pendingCount()).toBe(1);
     });
 
-    it('completar desde la lista también avanza la urgente', () => {
+    it('al completar la urgente desaparece de la lista y avanza la siguiente', () => {
       studyData.addTask({ title: 'A', status: 'pending', completed: false, dueDate: enDias(1) });
       studyData.addTask({ title: 'B', status: 'pending', completed: false, dueDate: enDias(2) });
+      studyData.addTask({ title: 'C', status: 'pending', completed: false, dueDate: enDias(3) });
       component.cargar();
 
-      component.completar(component.upcomingTasks()[0]);
+      expect(component.upcomingTasks().map(t => t.title)).toEqual(['B', 'C']);
+
+      component.completarUrgente();
       expect(component.urgentTask()?.title).toBe('B');
+      expect(component.upcomingTasks().map(t => t.title)).toEqual(['C']);
     });
   });
 

@@ -33,6 +33,11 @@
         <span>Biblioteca</span>
       </a>
 
+      <a routerLink="/mensajes" routerLinkActive="active">
+        <span class="nav-icon">✉</span>
+        <span>Mensajes</span>
+      </a>
+
       <a routerLink="/calendario" routerLinkActive="active">
         <span class="nav-icon">□</span>
         <span>Calendario</span>
@@ -211,7 +216,10 @@
 
           </button>
           <div class="profile-menu" *ngIf="profileMenuOpen">
-            <div class="profile-menu-heading"><strong>{{ user.name }}</strong><span>{{ user.email }}</span></div>
+            <div class="profile-menu-heading">
+              <strong>{{ user.name }}</strong>
+              <span>{{ user.email }}</span>
+            </div>
             <a routerLink="/" (click)="profileMenuOpen = false">Ir a la landing</a>
             <button type="button" (click)="logout()">Cerrar sesión</button>
           </div>

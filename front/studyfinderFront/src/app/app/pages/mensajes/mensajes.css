@@ -1,0 +1,36 @@
+:host { display: block; height: 100%; }
+.mensajes { display: grid; grid-template-columns: 320px 1fr; height: calc(100vh - 120px); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; background: var(--surface); }
+.sidebar { display: flex; flex-direction: column; border-right: 1px solid var(--border); }
+.header { display: flex; align-items: center; gap: 10px; padding: 12px; border-bottom: 1px solid var(--border); }
+.avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg,var(--accent),var(--accent)); color: white; display: grid; place-items: center; font-weight: 800; }
+.boton-agregar { margin-left: auto; border: 1px solid var(--border); background: transparent; color: var(--text); border-radius: 8px; padding: 6px 10px; cursor: pointer; }
+.agregar { padding: 10px; border-bottom: 1px solid var(--border); display: flex; gap: 8px; }
+.agregar input { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--text); }
+.agregar button { padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--accent); color: white; cursor: pointer; }
+.contactos { flex: 1; overflow: auto; }
+.item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-bottom: 1px solid var(--border); cursor: pointer; }
+.item:hover, .item.activo { background: var(--surface-soft); }
+.nombre { font-weight: 600; font-size: 12px; }
+.sub { font-size: 10px; color: var(--muted); }
+.chat { display: flex; flex-direction: column; }
+.chat-header { padding: 12px; border-bottom: 1px solid var(--border); font-weight: 600; }
+.mensajes-lista { flex: 1; overflow: auto; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+.msg { max-width: 70%; padding: 8px 10px; border-radius: 12px; font-size: 12px; }
+.msg.mio { align-self: flex-end; background: linear-gradient(135deg,var(--accent),var(--accent)); color: white; }
+.msg.otro { align-self: flex-start; background: var(--surface-soft); border: 1px solid var(--border); }
+.msg .adj { display: block; margin-top: 4px; color: inherit; }
+.input { display: flex; gap: 8px; padding: 10px; border-top: 1px solid var(--border); }
+.input input[type=text] { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: transparent; color: var(--text); }
+.input input[type=file] { color: var(--text); }
+.input button { padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--accent); color: white; cursor: pointer; }
+.solicitudes { padding: 10px; border-bottom: 1px solid var(--border); font-size: 11px; }
+.solicitud { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
+.botones { display: flex; gap: 6px; }
+.botones button { padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border); cursor: pointer; }
+.aceptar { background: var(--accent); color: white; }
+.rechazar { background: transparent; color: var(--text); }
+.resultados { max-height: 220px; overflow: auto; border-bottom: 1px solid var(--border); }
+.resultado { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+.resultado button { padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--accent); color: white; cursor: pointer; }
+.sin-resultados { padding: 10px 12px; font-size: 11px; color: var(--muted); }
+

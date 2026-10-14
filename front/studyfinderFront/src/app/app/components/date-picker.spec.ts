@@ -72,6 +72,7 @@ describe('DatePickerComponent', () => {
   });
 
   it('marca la fecha seleccionada', () => {
+    component.cursor.set(new Date(2026, 8, 1));
     component.value.set('2026-09-15');
     expect(component.celdas().filter(celda => celda.seleccionada).map(celda => celda.iso)).toEqual(['2026-09-15']);
   });

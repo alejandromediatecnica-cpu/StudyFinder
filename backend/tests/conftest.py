@@ -23,7 +23,7 @@ import app.database as database
 from app.main import app  # noqa: E402
 from app.api import documents as documents_api  # noqa: E402
 
-_COLLECTIONS = ("users", "auth_sessions", "documents", "materia_documents")
+_COLLECTIONS = ("users", "auth_sessions", "documents", "materia_documents", "contacts", "messages")
 
 
 @pytest.fixture
