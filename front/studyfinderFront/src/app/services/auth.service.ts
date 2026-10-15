@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap, timeout } from 'rxjs';
+import { apiEndpoint } from '../config/runtime-config';
 
 export interface AuthUser {
   id: string;
@@ -17,7 +18,7 @@ export interface AuthResponse {
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly apiUrl = 'http://localhost:8000/auth';
+  private readonly apiUrl = apiEndpoint('/auth');
 
   constructor(private http: HttpClient) {}
 

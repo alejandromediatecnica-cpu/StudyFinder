@@ -31,7 +31,7 @@ Run the two dev servers concurrently; the frontend is useless without the backen
 ## Ports and wiring are hardcoded — there is no config layer
 
 - The API base URL is a literal `http://localhost:8000` in `src/app/services/auth.service.ts:20`, `search.service.ts:9`, and `document.service.ts:16`. There are no `environment*.ts` files and no `proxyConfig` in `angular.json`.
-- Backend CORS allowlists only `http://localhost:4200` and `http://127.0.0.1:4200` (`backend/app/main.py:20`).
+- Backend CORS origins come from the `CORS_ORIGINS` env var (comma-separated, default `http://localhost:4200,http://127.0.0.1:4200`) read in `backend/app/config.py` and applied in `backend/app/main.py`. `config.py` also reads `MONGODB_URL`, `MONGODB_DATABASE` and `PORT` (all with sensible defaults) and calls `load_dotenv(BASE_DIR / ".env")`, so `backend/.env` works no matter the CWD and Render can inject the same keys. See `backend/.env.example` and the root `render.yaml` blueprint.
 - Change either port and you must update the other side by hand, or nothing works.
 
 ## Verification: `npm test` works — run BOTH `npm test` and `npm run build`
