@@ -1,0 +1,21 @@
+# Blueprint de Render para el backend de StudyFinder.
+# Crea el servicio con: Dashboard -> New -> Blueprint (o Web Service).
+# Las variables marcadas con "sync: false" se piden en el panel y NO se
+# guardan en el repositorio (credenciales / URLs de producción).
+services:
+  - type: web
+    name: studyfinder-backend
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.6
+      - key: MONGODB_DATABASE
+        value: studyfinder
+      - key: MONGODB_URL
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
