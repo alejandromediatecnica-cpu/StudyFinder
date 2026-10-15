@@ -1,32 +1,15 @@
-# StudyFinder
+# StudyFinder — Frontend
 
-**StudyFinder** es una aplicación web para estudiantes que reúne, en un solo lugar, la
-organización del estudio: materias, tareas, calendario, biblioteca de documentos,
-estadísticas y mensajería entre usuarios.
+**StudyFinder** es una aplicación web para estudiantes que reúne la organización del
+estudio: materias, tareas, calendario, biblioteca de documentos, estadísticas y mensajería
+entre usuarios.
 
-El proyecto tiene dos partes independientes que se ejecutan a la vez:
+Este repositorio contiene el **frontend**, hecho con **Angular 22** (componentes standalone,
+signals, SSR con prerender). Escucha en `http://localhost:4200`.
 
-- **Backend** (`backend/`): API REST hecha con **FastAPI** (Python). Guarda los usuarios y
-  los documentos en **MongoDB**. Escucha en `http://localhost:8000`.
-- **Frontend** (`front/studyfinderFront/`): aplicación web hecha con **Angular 22**.
-  Es lo que ve el usuario en el navegador. Escucha en `http://localhost:4200`.
-
-> El frontend **no funciona sin el backend**. Hay que tener los dos encendidos al mismo tiempo.
-
----
-
-## Índice
-
-1. [Qué puedes hacer en la aplicación](#qué-puedes-hacer-en-la-aplicación)
-2. [Requisitos previos](#requisitos-previos)
-3. [Descargar el proyecto](#descargar-el-proyecto)
-4. [Poner en marcha el backend](#paso-1-poner-en-marcha-el-backend)
-5. [Poner en marcha el frontend](#paso-2-poner-en-marcha-el-frontend)
-6. [Cómo usar la aplicación](#cómo-usar-la-aplicación)
-7. [Ejecutar las pruebas (tests)](#ejecutar-las-pruebas-tests)
-8. [Compilar para producción](#compilar-para-producción)
-9. [Problemas frecuentes](#problemas-frecuentes)
-10. [Estructura del repositorio](#estructura-del-repositorio)
+> El frontend **no funciona sin el backend** (repositorio `StudyFinder-backend`, FastAPI en
+> `http://localhost:8000`). Hay que tener los dos encendidos al mismo tiempo; consulta el
+> README del backend para levantarlo.
 
 ---
 
@@ -34,301 +17,168 @@ El proyecto tiene dos partes independientes que se ejecutan a la vez:
 
 - **Registrarte e iniciar sesión** con nombre, correo y contraseña.
 - **Materias**: ver las materias del semestre y activar las que curses.
-- **Biblioteca**: subir tus documentos (PDF, Word, PowerPoint, Excel), verlos y
-  descargarlos. Los documentos se comparten entre usuarios de la plataforma.
-- **Tareas**: crear tareas, marcar prioridad, fecha límite y adjuntar documentos de tu
-  biblioteca. Se organizan solas en columnas (Hoy, Pendientes, Completadas).
+- **Biblioteca**: subir documentos (PDF, Word, PowerPoint, Excel), verlos y descargarlos.
+  Los documentos se comparten entre usuarios.
+- **Tareas**: crear tareas con prioridad, fecha límite y documentos adjuntos.
 - **Calendario**: ver tus tareas y eventos por día.
-- **Mensajería**: buscar a otros usuarios **por su nombre**, agregarlos como contactos y
-  chatear con ellos (texto y archivos de hasta 3 MB).
+- **Mensajería**: buscar usuarios **por nombre**, agregarlos como contactos y chatear
+  (texto y archivos de hasta 3 MB).
 - **Estadísticas**: resumen de tu actividad de estudio.
 
 ---
 
 ## Requisitos previos
 
-Antes de empezar necesitas instalar estas herramientas en tu computador:
-
-| Herramienta | Versión recomendada | Para qué sirve | Cómo comprobar que la tienes |
-|---|---|---|---|
-| **Python** | 3.10 o superior | Ejecutar el backend | `python --version` |
-| **Node.js** | 20.19+, 22.12+ o 24+ | Ejecutar el frontend | `node --version` |
-| **npm** | Incluido con Node.js | Instalar librerías del frontend | `npm --version` |
-| **Git** | Cualquiera reciente | Descargar el proyecto | `git --version` |
-
-También necesitas una **base de datos MongoDB**. Lo más fácil es usar **MongoDB Atlas**
-(gratis, en la nube):
-
-1. Crea una cuenta en <https://www.mongodb.com/atlas>.
-2. Crea un clúster gratuito (opción *M0 / Free*).
-3. En *Database Access* crea un usuario de base de datos con su contraseña.
-4. En *Network Access* permite el acceso desde tu IP (o `0.0.0.0/0` para pruebas).
-5. En *Connect → Drivers* copia la cadena de conexión (empieza por `mongodb+srv://...`).
-   La usarás en el [Paso 1](#paso-1-poner-en-marcha-el-backend).
-
-> Si ya tienes MongoDB instalado en tu computador, también vale: usa la cadena
-> `mongodb://localhost:27017`.
+| Herramienta | Versión | Comprobar |
+| --- | --- | --- |
+| **Node.js** | 20.19+, 22.12+ o 24+ | `node --version` |
+| **npm** | Incluido con Node.js | `npm --version` |
+| **Backend StudyFinder** | En marcha en `http://localhost:8000` | Abrir <http://localhost:8000> |
 
 ---
 
-## Descargar el proyecto
+## Puesta en marcha
 
-Abre una terminal (en Windows puede ser **PowerShell**) y ejecuta:
+Todos los comandos se ejecutan **en la raíz de este repositorio**.
 
-```bash
-git clone https://github.com/alejandromediatecnica-cpu/StudyFinder.git
-cd StudyFinder
-```
-
-A partir de aquí, **cada comando se ejecuta dentro de su carpeta**. No hay un `package.json`
-ni un comando único en la raíz.
-
----
-
-## Paso 1: Poner en marcha el backend
-
-Todos los comandos de esta sección se ejecutan **dentro de la carpeta `backend/`**.
+### 1. Instalar dependencias
 
 ```bash
-cd backend
+npm ci
 ```
 
-### 1.1 Crear un entorno virtual (recomendado)
+Instala exactamente las versiones de `package-lock.json`. La primera vez tarda unos minutos.
 
-Aísla las librerías del proyecto para no ensuciar tu Python global.
+### 2. Configurar variables de entorno
 
-**Windows (PowerShell):**
+Copia la plantilla (los valores por defecto sirven para desarrollo local):
 
 ```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
+Copy-Item .env.example .env      # Windows (PowerShell)
 ```
-
-**macOS / Linux:**
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
+cp .env.example .env             # macOS / Linux
 ```
 
-> Sabrás que funcionó porque aparece `(.venv)` al inicio de la línea de la terminal.
-> Si PowerShell no deja activarlo, ejecuta primero:
-> `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`
+| Variable | Cuándo se usa | Descripción | Valor por defecto |
+| --- | --- | --- | --- |
+| `API_URL` | Compilación | URL base del backend, sin barra final. El origen del frontend debe estar en `CORS_ORIGINS` del backend. | `http://localhost:8000` |
+| `NG_ALLOWED_HOSTS` | Ejecución SSR | Hosts a los que responde el servidor SSR, separados por comas (admite `*.dominio.com`). Cualquier otro `Host` recibe **400** (protección SSRF). **Obligatoria** en producción con el dominio real. | — (sin valor, todo host recibe 400) |
+| `PORT` | Ejecución SSR | Puerto de `npm run serve:ssr:studyfinderFront`. | `4000` |
 
-### 1.2 Instalar las dependencias
+Cómo funciona:
 
-```bash
-pip install -r requirements.txt
-```
+- **Compilación**: `npm start`, `npm run build`, `npm run watch` y `npm test` ejecutan antes
+  `scripts/generate-env.mjs`, que lee `.env` y genera `src/environments/environment.ts`
+  (ignorado por Git). Si cambias `.env`, reinicia `npm start`. Estas variables acaban en el
+  JavaScript que descarga el navegador: son **públicas**, nunca pongas secretos.
+- **Ejecución SSR**: `src/server.ts` carga `.env` al arrancar. `NG_ALLOWED_HOSTS` es la
+  variable nativa de Angular SSR.
+- En ambos casos las variables del sistema, como las del panel de Vercel, tienen prioridad
+  sobre `.env`.
 
-Esto instala FastAPI, Uvicorn, PyMongo, etc.
-
-### 1.3 Configurar la conexión a la base de datos
-
-Crea un archivo `.env` copiando el ejemplo y edítalo con tus datos:
-
-**Windows (PowerShell):**
-
-```powershell
-Copy-Item .env.example .env
-```
-
-**macOS / Linux:**
-
-```bash
-cp .env.example .env
-```
-
-Abre `backend/.env` con un editor y reemplaza el usuario, la contraseña y el nombre del
-clúster por los de tu base de datos:
-
-```
-MONGODB_URL=mongodb+srv://TU_USUARIO:TU_PASSWORD@tu-cluster.mongodb.net/?appName=StudentHub1
-MONGODB_DATABASE=studyfinder
-```
-
-- `MONGODB_URL`: la cadena de conexión que copiaste de Atlas.
-- `MONGODB_DATABASE`: el nombre de la base de datos (déjalo como `studyfinder`).
-
-> El archivo `.env` **no se sube a Git** (está en `.gitignore`), así que tus credenciales
-> quedan solo en tu computador.
-
-### 1.4 Arrancar el servidor
-
-```bash
-python -m uvicorn app.main:app --port 8000
-```
-
-Si va bien verás algo así:
-
-```
-Uvicorn running on http://127.0.0.1:8000
-Application startup complete.
-```
-
-Comprueba abriendo en el navegador:
-
-- <http://localhost:8000> → debe responder
-  `{"message":"Backend de StudyFinder operando correctamente"}`
-- <http://localhost:8000/docs> → documentación interactiva de la API (Swagger).
-
-Deja esta terminal abierta. **No la cierres.**
-
----
-
-## Paso 2: Poner en marcha el frontend
-
-Abre **una segunda terminal** (deja el backend corriendo en la primera) y ve a la carpeta
-del frontend:
-
-```bash
-cd front/studyfinderFront
-```
-
-### 2.1 Instalar las dependencias
-
-```bash
-npm install
-```
-
-La primera vez tarda unos minutos.
-
-### 1.5 (Frontend) Arrancar el servidor de desarrollo
+### 3. Arrancar el servidor de desarrollo
 
 ```bash
 npm start
 ```
 
-Cuando termine de compilar, abre tu navegador en:
-
-**<http://localhost:4200>**
-
-Ya puedes registrarte y usar la aplicación.
+Abre <http://localhost:4200>. La página se recarga sola al guardar cambios.
 
 ---
 
-## Cómo usar la aplicación
-
-1. **Regístrate**: en la página de inicio pulsa *Crear cuenta* e ingresa tu nombre, correo y
-   una contraseña. También puedes iniciar sesión si ya tienes cuenta.
-2. **Elige tus materias**: entra a **Materias** y activa las que estás cursando.
-3. **Sube tus documentos**: en **Biblioteca** sube archivos (PDF, DOC/DOCX, PPT/PPTX,
-   XLS/XLSX). Cada usuario tiene **3 MB de almacenamiento**.
-4. **Organiza tus tareas**: en **Tareas** crea tareas con prioridad, fecha límite y adjuntos.
-5. **Revisa tu calendario**: en **Calendario** verás tus tareas por día.
-6. **Chatea con otros estudiantes**: en **Mensajería**, usa *+ Agregar*, escribe el
-   **nombre** de la persona, elige el resultado y envíale una solicitud. Cuando la acepte,
-   podrán chatear.
-
-> **Importante**: los datos de tu sesión (usuario y token) se guardan en el navegador
-> (`localStorage`). Si cierras sesión o borras los datos del navegador, tendrás que
-> iniciar sesión de nuevo.
-
----
-
-## Ejecutar las pruebas (tests)
-
-El proyecto incluye pruebas automáticas. No son obligatorias para usar la aplicación, pero
-sirven para comprobar que todo funciona.
-
-### Backend
-
-Las pruebas usan una base de datos en memoria (`mongomock`), así que **no necesitas MongoDB**
-para ejecutarlas. Primero instala las dependencias de desarrollo:
+## Pruebas
 
 ```bash
-cd backend
-pip install -r requirements-dev.txt
-python -m pytest
+npm test            # pruebas unitarias (Vitest + jsdom)
+npm run build       # comprueba tipos, compila AOT y prerenderiza las rutas
 ```
 
-### Frontend
+Para ejecutar solo un archivo de pruebas:
 
 ```bash
-cd front/studyfinderFront
-npm test
+npx ng test --include "src/app/app/pages/login/login.spec.ts"
 ```
 
-Para comprobar también que el proyecto compila correctamente:
-
-```bash
-npm run build
-```
+> Los avisos de presupuesto `anyComponentStyle` (CSS de componente > 4 kB) son esperados y
+> no detienen la compilación.
 
 ---
 
 ## Compilar para producción
 
-Si quieres publicar la aplicación en un servidor:
-
 ```bash
-cd front/studyfinderFront
 npm run build
 ```
 
-Esto genera la carpeta `dist/studyfinderFront/`. Para servirla:
+Genera `dist/studyfinderFront/` (`browser/` estático + `server/` para SSR). Para servirlo
+con Node:
 
 ```bash
-npm run serve:ssr:studyfinderFront
+npm run serve:ssr:studyfinderFront      # escucha en PORT (por defecto 4000)
 ```
 
-El backend en producción se levanta igual que en desarrollo, pero sin el modo de
-recarga y detrás de un servidor de producción (por ejemplo, Uvicorn con Gunicorn).
+> El servidor SSR solo responde a los hosts de `NG_ALLOWED_HOSTS`. Para desplegar en un
+> dominio real, añádelo a esa variable en el hosting (p. ej. `NG_ALLOWED_HOSTS=studyfinder.app`)
+> y define `API_URL` con la URL pública del backend **antes** de compilar.
+
+---
+
+## Cómo usar la aplicación
+
+1. **Regístrate**: en la página de inicio pulsa *Crear cuenta*, o inicia sesión si ya
+   tienes cuenta.
+2. **Elige tus materias** en **Materias**.
+3. **Sube documentos** en **Biblioteca** (PDF, DOC/DOCX, PPT/PPTX, XLS/XLSX). Cada usuario
+   dispone de **3 MB**.
+4. **Organiza tus tareas** en **Tareas**; las que tienen fecha aparecen en **Calendario**.
+5. **Chatea**: en **Mensajería** usa *+ Agregar*, busca a la persona por su nombre y envíale
+   una solicitud. Cuando la acepte, podréis chatear.
+
+> La sesión (usuario y token) se guarda en el navegador (`localStorage`). Las tareas, el
+> calendario, las materias y las estadísticas también se guardan solo en el navegador.
+
+---
+
+## Estructura
+
+```text
+StudyFinder-Frontend/
+├── src/
+│   ├── app/
+│   │   ├── app/pages/        # Pantallas: landing, login, signup, main, materias, tareas...
+│   │   ├── app/components/   # Componentes reutilizables (date-picker, styled-select)
+│   │   ├── services/         # Comunicación con el backend y estado local
+│   │   ├── utils/            # Utilidades (mensajes de error del backend)
+│   │   ├── app.routes.ts     # Rutas y guards de autenticación
+│   │   └── app.config.ts     # Providers de la aplicación
+│   ├── environments/         # environment.ts generado desde .env (no se versiona)
+│   ├── server.ts             # Servidor Express para SSR
+│   └── styles.css            # Tokens de diseño globales
+├── public/                   # Recursos estáticos (favicon, fondo)
+├── scripts/generate-env.mjs  # Genera environment.ts a partir de .env
+├── .env.example              # Plantilla de variables de entorno
+├── angular.json
+├── package.json
+└── AGENTS.md                 # Notas técnicas para desarrollo
+```
 
 ---
 
 ## Problemas frecuentes
 
-**«No se puede conectar a la API» / la app no carga datos**
-- Asegúrate de que el **backend esté encendido** en `http://localhost:8000`.
-- Revisa que el frontend esté en el **puerto 4200** exactamente. Los puertos están fijos en
-  el código: cambiar uno obliga a cambiar el otro.
+**La app no carga datos / «No se puede conectar a la API»:**
 
-**«No conecta a MongoDB» (error al arrancar el backend)**
-- Revisa que `backend/.env` exista y que `MONGODB_URL` sea correcta (usuario y contraseña
-  bien escritos).
-- En Atlas, comprueba que tu IP esté permitida en *Network Access*.
+- Comprueba que el backend esté encendido en `http://localhost:8000`.
+- Comprueba que `API_URL` en `.env` apunte al backend y reinicia `npm start`.
+- Si la consola del navegador muestra un error de CORS, añade la URL del frontend a
+  `CORS_ORIGINS` en el `.env` del backend.
 
-**`python` o `pip` no se reconocen**
-- En Windows prueba con `py` en lugar de `python`.
-- Verifica que Python quedó marcado como «Add to PATH» durante la instalación.
+**Error al importar `environments/environment`** — el archivo se genera al ejecutar
+`npm start`/`npm run build`/`npm test`; si usas `ng` directamente, ejecuta antes `npm run env`.
 
-**`npm` no se reconoce**
-- Instala Node.js desde <https://nodejs.org> y reinicia la terminal.
+**`npm` no se reconoce** — instala Node.js desde <https://nodejs.org> y reinicia la terminal.
 
-**El frontend muestra «Inicia sesión» pero ya inicié sesión**
-- Los datos de sesión se guardan en el navegador. Cierra sesión y vuelve a entrar, o borra
-  los datos del sitio e inténtalo de nuevo.
-
-**PowerShell no me deja activar el entorno virtual**
-- Ejecuta `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` y vuelve a intentarlo.
-
----
-
-## Estructura del repositorio
-
-```
-StudyFinder/
-├── backend/                     # API en FastAPI (Python)
-│   ├── app/
-│   │   ├── api/                 # Rutas: auth, documents, search, users, contacts, messages
-│   │   ├── main.py              # Punto de entrada y configuración de CORS
-│   │   ├── database.py          # Acceso a MongoDB
-│   │   └── config.py            # Lee el archivo .env
-│   ├── tests/                   # Pruebas (pytest + mongomock)
-│   ├── scripts/                 # Migración de datos antiguos
-│   ├── requirements.txt         # Dependencias
-│   ├── requirements-dev.txt     # Dependencias para pruebas
-│   └── .env.example             # Plantilla de configuración
-│
-├── front/studyfinderFront/      # Aplicación web en Angular 22
-│   └── src/app/
-│       ├── app/pages/           # Pantallas: landing, login, main, materias, tareas...
-│       └── services/            # Conexión con el backend (auth, search, documents, messages...)
-│
-├── AGENTS.md                    # Notas técnicas para quien desarrolla el código
-└── README.md                    # Este archivo
-```
-
-> La carpeta `front.zip` en la raíz es una copia antigua del frontend y **no se usa** para
-> ejecutar la aplicación. Puedes ignorarla.
+**Aparece «Inicia sesión» aunque ya iniciaste sesión** — cierra sesión y vuelve a entrar,
+o borra los datos del sitio en el navegador.
