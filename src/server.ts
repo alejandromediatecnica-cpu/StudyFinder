@@ -20,16 +20,19 @@ const app = express();
 const angularApp = new AngularNodeAppEngine();
 
 /**
- * Example Express Rest API endpoints can be defined here.
- * Uncomment and define endpoints as necessary.
+ * Configuracion en tiempo de ejecucion para el navegador.
  *
- * Example:
- * ```ts
- * app.get('/api/{*splat}', (req, res) => {
- *   // Handle API request
- * });
- * ```
+ * La URL del backend se lee de la variable de entorno API_URL y se expone como
+ * /env.js, que index.html carga antes de la app. Asi no hay que reconstruir el
+ * frontend para apuntar a otro backend. Debe declararse antes del estatico para
+ * tener prioridad sobre public/env.js.
  */
+app.get('/env.js', (_req, res) => {
+  const apiUrl = process.env['API_URL'] ?? '';
+  res.type('application/javascript');
+  res.setHeader('Cache-Control', 'no-store');
+  res.send(`window.__STUDYFINDER_ENV__ = ${JSON.stringify({ apiUrl })};`);
+});
 
 /**
  * Serve static files from /browser

@@ -1,21 +1,26 @@
 # AGENTS.md
 
-This repo is the **frontend only**, at the repo root — Angular 22, standalone components, signals, SSR + prerender. No Makefile, no CI.
+Two independent apps, no orchestrator. There is no root `package.json`, no Makefile, no CI, and the root `README.md` is empty — every command below must be run from inside its subdirectory.
 
-The backend (FastAPI, MongoDB Atlas via pymongo, tests con mongomock) lives in its own repo, `StudyFinder-backend`, managed with `uv`. The backend notes below (paths like `backend/app/...`) refer to that repo, where the package is `app/` at its root.
+- `backend/` — FastAPI, persistence en MongoDB Atlas (pymongo) vía `backend/.env`; tests con mongomock.
+- `front/studyfinderFront/` — Angular 22, standalone components, signals, SSR + prerender.
 
 Everything user-facing is Spanish: UI copy, comments, and commit messages. Keep it that way.
 
 ## Commands
 
 ```powershell
-# backend (in the StudyFinder-backend repo root; Python 3.13 via uv)
-uv sync
-uv run uvicorn app.main:app --port 8000           # http://localhost:8000, docs at /docs
-uv run pytest                                      # 113 tests, all green
+# backend (must be run from `backend/` so the `app.` package resolves)
+cd backend
+pip install -r requirements.txt
+python -m uvicorn app.main:app --port 8000        # http://localhost:8000, docs at /docs
 
-# frontend (this repo root)
-npm ci
+# backend tests (needs `pip install -r requirements-dev.txt`; pytest is NOT in requirements.txt)
+python -m pytest                                   # 113 tests in backend/tests, all green
+
+# frontend
+cd front/studyfinderFront
+npm install
 npm start                                          # ng serve -> http://localhost:4200
 npm run build                                      # production + SSR, default config
 npm run serve:ssr:studyfinderFront                 # serves dist/ on PORT (default 4000)
@@ -23,21 +28,18 @@ npm run serve:ssr:studyfinderFront                 # serves dist/ on PORT (defau
 
 Run the two dev servers concurrently; the frontend is useless without the backend.
 
-## Environment config — `.env` → generated `environment.ts`
+## Ports and wiring are hardcoded — there is no config layer
 
-- The API base URL comes from `API_URL` (default `http://localhost:8000`). `scripts/generate-env.mjs` reads `.env` (system env vars win, e.g. Vercel) and writes `src/environments/environment.ts`, which is **gitignored** and imported by the services and specs as `environment.apiUrl`. `npm start/build/watch/test` regenerate it via `pre*` scripts; when calling `ng`/`npx ng` directly, run `npm run env` first. Every variable is documented in `.env.example`.
-- Frontend env vars are compiled into the browser bundle: never put secrets there.
-- SSR runtime vars: `src/server.ts` loads `.env` (system env wins) and builds `AngularNodeAppEngine` with **no** `allowedHosts` option, so Angular reads the native `NG_ALLOWED_HOSTS` (comma-separated, `*.domain` allowed). There is no `security.allowedHosts` in `angular.json` any more: if `NG_ALLOWED_HOSTS` is unset, every request gets **400**. `PORT` (default 4000) is also read there.
-- There must be no hardcoded URLs/hosts in app code — add a variable to `.env.example` instead. URLs inside `*.spec.ts` fixtures (`https://x.com/...`) are test data, not config.
-- If `npm run build` fails with `EINVAL` while extracting routes, another `ng serve`/`ng build` is probably running; `NG_BUILD_MAX_WORKERS=1 npm run build` works around it.
-- Backend CORS is `CORS_ORIGINS` in the backend `.env` (default `http://localhost:4200,http://127.0.0.1:4200`). Changing the frontend origin requires updating it there.
+- The API base URL is a literal `http://localhost:8000` in `src/app/services/auth.service.ts:20`, `search.service.ts:9`, and `document.service.ts:16`. There are no `environment*.ts` files and no `proxyConfig` in `angular.json`.
+- Backend CORS origins come from the `CORS_ORIGINS` env var (comma-separated, default `http://localhost:4200,http://127.0.0.1:4200`) read in `backend/app/config.py` and applied in `backend/app/main.py`. `config.py` also reads `MONGODB_URL`, `MONGODB_DATABASE` and `PORT` (all with sensible defaults) and calls `load_dotenv(BASE_DIR / ".env")`, so `backend/.env` works no matter the CWD and Render can inject the same keys. See `backend/.env.example` and the root `render.yaml` blueprint.
+- Change either port and you must update the other side by hand, or nothing works.
 
 ## Verification: `npm test` works — run BOTH `npm test` and `npm run build`
 
 `npm test` was originally broken because every `*.spec.ts` imported a class name without the `Component` suffix (renamed components). That was fixed; today the suite is **274 tests in 24 files, all green**, run by Vitest via the `@angular/build:unit-test` builder (jsdom, zoneless — no `zone.js`).
 
-- Test wiring lives in `angular.json` (`test` target), `tsconfig.spec.json`, and `src/test-setup.ts` (clears `localStorage`, stubs `confirm` and the Object-URL API between tests). Run a subset with `npx ng test --include "src/app/app/pages/login/login.spec.ts"`.
-- Test conventions: services are tested through `HttpTestingController` against `${environment.apiUrl}/...` URLs; `urlWithParams`/query-string matches must include the full URL. Component specs mount the standalone component directly and rely on the shared mocks.
+- Test wiring lives in `front/studyfinderFront/angular.json` (`test` target), `tsconfig.spec.json`, and `src/test-setup.ts` (clears `localStorage`, stubs `confirm` and the Object-URL API between tests). Run a subset with `npx ng test --include "src/app/app/pages/login/login.spec.ts"`.
+- Test conventions: services are tested through `HttpTestingController` against the real hardcoded URLs; `urlWithParams`/query-string matches must include the full URL. Component specs mount the standalone component directly and rely on the shared mocks.
 - Pitfalls seen in this repo's tests: `#<ref>` inside `<input>` is a template reference variable, **not** an `id` attribute, so query it by `input[type="file"]`; jsdom has no `DataTransfer` (inject `files` with `Object.defineProperty`) and no anchor navigation (spy on `HTMLAnchorElement.prototype.click`); `createComponent` schedules `ngOnInit` on a later macrotask, so call `fixture.detectChanges()` explicitly instead of waiting on `whenStable()`; `vi.useFakeTimers()` + `await vi.advanceTimersByTimeAsync(...)` for rxjs `timeout(...)` paths — and for rxjs `debounceTime(...)` install the fake timers **before** emitting the value, or the timer is scheduled in real-time space and never advances.
 - To verify frontend work, run `npm run build` (typechecks + AOT-compiles + prerenders 11 routes) **and** `npm test`.
 - `npm test` produces `anyComponentStyle` budget warnings for `landing/layout/materias/tareas/calendario/library/main` CSS exceeding 4kB. Non-fatal and expected — don't "fix" them by shrinking styles.
@@ -50,6 +52,8 @@ Run the two dev servers concurrently; the frontend is useless without the backen
 - Library is shared between users: `list_documents_from_others(user_id)` returns documents uploaded by the rest with the owner's name/email (route `GET /documents/public`), and downloads work for any authenticated user. `associate_document` no longer checks ownership, so anyone can assign any document to their own materias — the filter `list_documents(user_id, materia)` therefore matches by `id` only, not by owner. Deletion stays owner-scoped.
 - Storage quota is **3 MB per user** (`MAX_STORAGE_PER_USER` in `app/api/documents.py`): `POST /documents` returns **413** when the sum of the user's file sizes would exceed it. Files are still stored on disk under `backend/uploads/<user_id>/<uuid><ext>` — Mongo only stores metadata. Migrating legacy SQLite data: `python -m scripts.migrate_sqlite_to_mongo` (idempotent, preserves user `_id`s).
 - `backend/tests/` runs against **`mongomock`** (in-memory), not real Atlas: `tests/conftest.py` sets `MONGODB_URL`/`MONGODB_DATABASE` to local values, swaps `pymongo.MongoClient` for `mongomock.MongoClient` **before** importing the app, and empties the shared mock collections in the `db` fixture for per-test isolation.
+- `backend/app/static/index.html` is dead code: `main.py` never mounts `StaticFiles`.
+- `backend/app/schemas/search_response.py` and `backend/app/models/document.py` are unused, and `search_response.py` has a broken import (`from models.document`, not `app.models.document`). Nothing imports them, so the app boots — don't fix speculatively.
 - `backend/app/main.py` uses the deprecated `@app.on_event("startup")`; the test suite relies on `initialize_database()` running at import and on FastAPI startup. `backend/tests/conftest.py` redirects `DATABASE_PATH`/`UPLOADS_PATH` to temp dirs before importing the app, and `backend/tests/test_documents.py` also patches `app.api.documents.UPLOADS_PATH` because that module captures the value at import time.
 
 ## Auth model
@@ -81,7 +85,9 @@ Run the two dev servers concurrently; the frontend is useless without the backen
 - `Task.status` is stored but the board column is derived by `TareasComponent.statusActual` from `completed` + `dueDate` (completed → Completadas, no date → Pendientes, due today or earlier → Hoy, within 7 days → Esta semana, later → Pendientes). Task filtering is accent-insensitive via `sinAcentos()`.
 - Global design tokens are CSS custom properties in `src/styles.css` (`--primary`, `--surface`, `--border`, `--radius-md`, ...). Page CSS consumes those; there is no component library or theme file. Solo existe tema oscuro (no hay bloque `:root[data-theme='light']`); `ThemeService` (`services/theme.service.ts`) gestiona la clave `studyfinder_theme`.
 - Some UI is intentionally decorative: the Configuración page and the Study AI chat have no backend and are not wired up. Don't implement them; they were deliberately left as-is to keep the scope to real bugs. The login/signup timeout error copy no longer mentions MongoDB, and `index.html` has `lang="es"`.
+- `front.zip` at the repo root is a committed snapshot of the frontend, not a build input. Editing or "refreshing" it does nothing to the running app.
 
 ## Git
 
 Default branch is `develop` (`origin/HEAD` points at `main`; there is also `release` and several stale `feature/*` branches). Commits are short and Spanish, e.g. `Corrige busqueda reactiva y activa materias`. No PR template, no hooks, no CI checks to satisfy.
+

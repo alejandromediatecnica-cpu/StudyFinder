@@ -166,6 +166,47 @@ StudyFinder-Frontend/
 
 ---
 
+## Desplegar el backend en Render
+
+El backend está listo para publicarse en [Render](https://render.com). Lee toda su
+configuración (base de datos y CORS) desde **variables de entorno**, igual que en local
+con el archivo `.env`, así que **ninguna credencial queda en el código**.
+
+### 1. Crear el servicio
+
+En <https://dashboard.render.com/web/new> crea un **Web Service** conectado a este
+repositorio y usa estos valores:
+
+| Ajuste | Valor |
+|---|---|
+| **Root Directory** | `backend` |
+| **Build Command** | `pip install -r requirements.txt` |
+| **Start Command** | `uvicorn app.main:app --host 0.0.0.0 --port $PORT` |
+| **Runtime** | Python 3 |
+
+> También puedes usar el archivo `render.yaml` de la raíz del repositorio: en Render elige
+> *New → Blueprint* y selecciona el repo; los valores se rellenan solos.
+
+### 2. Definir las variables de entorno
+
+En el servicio, entra a **Environment → Environment Variables** y agrega exactamente las
+mismas claves de `backend/.env.example`:
+
+| Variable | Valor en Render | Secreta |
+|---|---|---|
+| `MONGODB_URL` | Tu cadena de conexión de MongoDB Atlas | Sí |
+| `MONGODB_DATABASE` | `studyfinder` | No |
+| `CORS_ORIGINS` | La URL pública de tu frontend, p. ej. `https://tu-front.onrender.com` | No |
+
+`PORT` **no** hace falta definirlo: Render lo asigna automáticamente y el backend lo lee.
+
+> Como el backend guarda las subidas en disco (`backend/uploads/`), en el plan gratuito de
+> Render ese almacenamiento es efímero: los archivos pueden perderse al reiniciar el
+> servicio. Para conservarlos, añade un *Persistent Disk* o migra los archivos a un
+> servicio de almacenamiento.
+
+---
+
 ## Problemas frecuentes
 
 **La app no carga datos / «No se puede conectar a la API»:**

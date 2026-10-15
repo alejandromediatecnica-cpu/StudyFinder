@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, timeout } from 'rxjs';
 import { AuthService } from './auth.service';
-import { environment } from '../../environments/environment';
+import { apiEndpoint } from '../config/runtime-config';
 
 export interface LibraryDocument {
   id: string;
@@ -16,7 +16,7 @@ export interface LibraryDocument {
 
 @Injectable({ providedIn: 'root' })
 export class DocumentService {
-  private readonly apiUrl = `${environment.apiUrl}/documents`;
+  private readonly apiUrl = apiEndpoint('/documents');
 
   constructor(private http: HttpClient, private auth: AuthService) {}
 

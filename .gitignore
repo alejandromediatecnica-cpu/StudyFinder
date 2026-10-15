@@ -1,24 +1,21 @@
-# See https://docs.github.com/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
+# Created by https://www.toptal.com/developers/gitignore/api/angular,windows
+# Edit at https://www.toptal.com/developers/gitignore?templates=angular,windows
 
-# Compiled output
-/dist
-/tmp
-/out-tsc
-/bazel-out
+### Angular ###
+## Angular ##
+# compiled output
+dist/
+tmp/
+out-tsc/
+app/**/*.js
+app/**/*.js.map
 
-# Node
-/node_modules
-npm-debug.log
-yarn-error.log
+# dependencies
+node_modules/
+bower_components/
 
 # IDEs and editors
 .idea/
-.project
-.classpath
-.c9/
-*.launch
-.settings/
-*.sublime-workspace
 
 # Visual Studio Code
 .vscode/*
@@ -26,27 +23,57 @@ yarn-error.log
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
-!.vscode/mcp.json
-.history/*
+.history/
 
+# misc
+.sass-cache/
+connect.lock/
+coverage/
+libpeerconnection.log/
+npm-debug.log
+yarn-error.log
+testem.log
+typings/
+.angular/
+__screenshots__/
+
+# e2e
+e2e/*.js
+e2e/*.map
+
+# System Files
+.DS_Store/
+
+### Windows ###
+# Windows thumbnail cache files
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+
+# Dump file
+*.stackdump
+
+# Folder config file
+[Dd]esktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Windows Installer files
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+
+# Windows shortcuts
+*.lnk
+
+# End of https://www.toptal.com/developers/gitignore/api/angular,windows
+
+### StudyFinder ###
 # Variables de entorno (la plantilla versionada es .env.example)
 .env
 .env.*
 !.env.example
-
-# Generado desde .env por scripts/generate-env.mjs
-/src/environments/environment.ts
-
-# Miscellaneous
-/.angular/cache
-.sass-cache/
-/connect.lock
-/coverage
-/libpeerconnection.log
-testem.log
-/typings
-__screenshots__/
-
-# System files
-.DS_Store
-Thumbs.db

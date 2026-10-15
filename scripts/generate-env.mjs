@@ -1,25 +1,22 @@
-// Genera src/environments/environment.ts a partir de `.env` y de las variables del sistema.
-// Se ejecuta solo antes de `npm start`, `npm run build`, `npm run watch` y `npm test`.
-// Las variables del sistema (p. ej. las definidas en Vercel) tienen prioridad sobre `.env`.
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+// Genera public/env.js con la URL del backend tomada de la variable de entorno
+// API_URL. En Vercel se define en Project Settings -> Environment Variables y
+// Vercel la inyecta en tiempo de build.
+//
+// Se ejecuta automaticamente antes de `ng build` (script "prebuild"), de modo
+// que el bundle servido en produccion apunta al backend correcto sin tener que
+// tocar el codigo. Si API_URL no esta definida, deja el archivo por defecto
+// (la app usa entonces environment.apiUrl).
+import { writeFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 
-if (existsSync('.env')) {
-  process.loadEnvFile('.env');
-}
+const here = dirname(fileURLToPath(import.meta.url));
+const target = join(here, '..', 'public', 'env.js');
+const apiUrl = (process.env.API_URL ?? '').trim();
 
-const apiUrl = (process.env.API_URL || 'http://localhost:8000').trim().replace(/\/+$/, '');
-if (!/^https?:\/\/[^/\s]+/.test(apiUrl)) {
-  console.error(`API_URL no es una URL http(s) válida: "${apiUrl}"`);
-  process.exit(1);
-}
+const contents = apiUrl
+  ? `window.__STUDYFINDER_ENV__ = ${JSON.stringify({ apiUrl })};\n`
+  : 'window.__STUDYFINDER_ENV__ = window.__STUDYFINDER_ENV__ || {};\n';
 
-mkdirSync('src/environments', { recursive: true });
-writeFileSync(
-  'src/environments/environment.ts',
-  `// Archivo generado por scripts/generate-env.mjs a partir de .env. No editar a mano.
-export const environment = {
-  apiUrl: ${JSON.stringify(apiUrl)},
-} as const;
-`,
-);
-console.log(`environment.ts generado (API_URL=${apiUrl})`);
+writeFileSync(target, contents, 'utf8');
+console.log(`env.js generado: apiUrl=${apiUrl || '(vacio: se usa environment.apiUrl)'}`);

@@ -39,7 +39,7 @@
 .brand { display: flex; align-items: center; gap: 12px; padding: 0 10px 34px; }
 .brand-mark {
   width: 42px; height: 42px; display: grid; place-items: center; border-radius: 13px;
-  background: linear-gradient(145deg, var(--accent), var(--accent)); color: white; font-weight: 800; font-size: 19px;
+  background: var(--accent); color: white; font-weight: 800; font-size: 19px;
   box-shadow: 0 12px 28px var(--accent-glow);
 }
 .brand strong { display: block; font-size: 17px; letter-spacing: -.02em; }
@@ -64,7 +64,7 @@ nav a.active, .sidebar-bottom > a.active {
 .profile-mini { margin-top: 12px; padding: 13px 10px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
 .profile-mini strong { display: block; font-size: 12px; }
 .profile-mini span:not(.profile-dot) { display: block; margin-top: 3px; color: var(--text-muted); font-size: 10px; }
-.avatar { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: linear-gradient(135deg,var(--accent),var(--accent)); font-size: 12px; font-weight: 800; color: white; }
+.avatar { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: var(--accent); font-size: 12px; font-weight: 800; color: white; }
 .profile-dot { width: 7px; height: 7px; margin-left: auto; border-radius: 50%; background: var(--success); box-shadow: 0 0 12px var(--accent-green); }
 
 .content-area { position: relative; z-index: 1; min-width: 0; min-height: 100vh; overflow: hidden; }
@@ -245,70 +245,6 @@ nav a.active, .sidebar-bottom > a.active {
   color: var(--text-muted);
 
   opacity: 1;
-
-}
-
-
-/* ---------------------------------------------------------
-   BOTÓN BUSCAR
-   --------------------------------------------------------- */
-
-.search-button {
-
-  height: 32px;
-
-  padding: 0 14px;
-
-  border: none;
-
-  border-radius: 9px;
-
-  background: linear-gradient(
-    135deg,
-    var(--accent),
-    var(--accent)
-  );
-
-  color: var(--text-on-accent);
-
-  font-family: inherit;
-
-  font-size: 11px;
-
-  font-weight: 600;
-
-  cursor: pointer;
-
-  transition:
-    transform 0.15s ease,
-    filter 0.15s ease,
-    opacity 0.15s ease;
-}
-
-
-.search-button:hover {
-
-  filter: brightness(1.08);
-
-  transform: translateY(-1px);
-
-}
-
-
-.search-button:active {
-
-  transform: translateY(0);
-
-}
-
-
-.search-button:disabled {
-
-  opacity: 0.55;
-
-  cursor: wait;
-
-  transform: none;
 
 }
 

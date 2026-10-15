@@ -1,13 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from './auth.service';
-import { environment } from '../../environments/environment';
+import { apiBaseUrl } from '../config/runtime-config';
 
 @Injectable({ providedIn: 'root' })
 export class MessagesService {
   private readonly http = inject(HttpClient);
   private readonly auth = inject(AuthService);
-  private readonly base = environment.apiUrl;
+  private readonly base = apiBaseUrl();
 
   private headers(): HttpHeaders {
     const token = this.auth.getToken();
